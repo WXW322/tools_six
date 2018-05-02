@@ -1,0 +1,94 @@
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.neural_network import MLPClassifier
+from sklearn import metrics
+import sys
+
+
+class train_data:
+    def __init__(self,data_num,file_name):
+        self.data_num = data_num
+        self.models = []
+        self.filename = file_name
+        self.data_right = None
+        self.data_wrong = None
+        self.data_valid = None
+
+    def get_dataset(self):
+        data = pd.read_csv(self.filename)
+        self.data_right = data[data['lable'] == 1]
+        self.data_wrong = data[data['lable'] == 0]
+        length_r = self.data_right.shape[0]
+        length_w = self.data_wrong.shape[0]
+        self.data_valid = self.data_right[0:length_r/10]
+        self.data_right = self.data_right[length_r/10:]
+        self.data_valid = pd.concat([self.data_valid,self.data_wrong[0:length_r/10]])
+        self.data_wrong = self.data_wrong[length_r/10:]
+        i = 0
+        datas = []
+        while(i < self.data_num):
+            #data_temp = self.data_wrong.sample(frac = 0.1)
+            data_temp = []
+            datas.append(data_temp)
+            i = i + 1
+        return self.data_right,datas
+
+    def get_tempdata(self):
+        data = pd.read_csv(self.filename)
+        self.data_right = data[data['lable'] == 1]
+        self.data_wrong = data[data['lable'] == 0]
+        length_r = self.data_right.shape[0]
+        length_w = self.data_wrong.shape[0]
+        self.data_valid = self.data_right[0:length_r/10]
+        self.data_right = self.data_right[length_r/10:]
+        self.data_valid = pd.concat([self.data_valid,self.data_wrong[0:length_r/10]])
+        self.data_wrong = self.data_wrong[length_r/10:]
+        i = 0
+        datas = []
+        length_one = self.data_right.shape[0]
+        length_two = self.data_wrong.shape[0]
+        t_num = length_two/length_one
+        pre = 0
+        while(i < t_num):
+            data_temp = self.data_wrong[pre:pre+length_one]
+            datas.append(data_temp)
+            pre = pre + length_one
+            i = i + 1
+        datas.append(self.data_wrong[pre:])
+        return self.data_right,datas
+
+    def get_models(self,features,lable):
+        i = 0
+        data_right,data_wrong = self.get_tempdata()
+        #while(i < self.data_num):
+        while (i < len(data_wrong)):
+            models_temp = MLPClassifier(hidden_layer_sizes=(40,40),activation='relu',solver='adam')
+            data_new = pd.concat([data_right,data_wrong[i]])
+            i = i + 1
+            models_temp.fit(data_new[features],data_new[lable])
+            self.models.append(models_temp)
+
+    def validate(self,features,lable):
+        print 'out'
+        i = 0
+        while(i < self.data_num):
+            model_temp = self.models[i]
+            print model_temp.score(self.data_valid[features],self.data_valid[lable])
+            i = i + 1
+
+
+
+
+
+
+
+
+data = pd.read_csv('/home/wxw/data/iec104_pure/lable_finalone.csv')
+feature = data.columns.values.tolist()
+feature.remove('value')
+feature.remove('lable')
+tt = train_data(10,'/home/wxw/data/iec104_pure/lable_finalone.csv')
+tt.get_dataset()
+tt.get_models(feature,'lable')
+tt.validate(feature,'lable')
