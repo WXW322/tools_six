@@ -144,7 +144,7 @@ class frequents_find:
                 g_r[i + 1].append(str(se_new))
             i = i + 1
 
-        print g_r
+        print (g_r)
         i = 1
         while(len(g_r[i+1]) > 0):
             t_con = []
@@ -177,7 +177,7 @@ class frequents_find:
                     t_length[i] = t_length[i] + 1
                 i = i + 1
         for key in t_result:
-            t_result[key] = sorted(t_result[key].iteritems(), key=lambda d:d[1], reverse = True)
+            t_result[key] = sorted(t_result[key].items(), key=lambda d:d[1], reverse = True)
 
         t_final = {}
         length = len(t_result)

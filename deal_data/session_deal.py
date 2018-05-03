@@ -35,13 +35,11 @@ class session_deal:
         package_three = []
         length = len(package_one)
         i = 0
-        print length
+      #  print length
         while(i < length):
             if package_two[i].layers[t_lo].layer_name == protocolname:
                 package_three.append(package_one[i])
-            print i
             i = i + 1
-        print 'out'
         t_writer = PcapWriter('/home/wxw/data/' + 'iec104_pure' + '.pcap', append=True)
         for p in package_three:
             t_writer.write(p)
@@ -81,7 +79,7 @@ class session_deal:
         return self.final_sessions
 
     def get_sessionsbytime(self):
-        print 'aa'
+        print ('aa')
 
 
     def clus_sesionbydi(self,messages):

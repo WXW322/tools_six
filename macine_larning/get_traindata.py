@@ -24,7 +24,7 @@ class produce_medata:
             while(i < t_length):
                 t_lo.append(i)
                 t_node = str(data.data[i:i+1])
-                t_node = struct.unpack('>B',t_node)
+                t_node = struct.unpack('>B',data.data[i:i+1])
                 t_value.append(t_node[0])
                 if i in lo_s:
                     t_lable.append(1)
@@ -62,7 +62,7 @@ class produce_medata:
 
 
 def get_train():
-    data = PCAPImporter.readFile('/home/wxw/data/iec104/10.55.37.310.55.218.2.pcap').values()
+    data = PCAPImporter.readFile('/home/wxw/data/iec104_pure.pcap').values()
     dd = produce_medata(data)
     t_R = dd.get_loinfo()
     dd.get_lable(data,[0,6,8])
