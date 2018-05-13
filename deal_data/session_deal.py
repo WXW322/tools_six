@@ -4,6 +4,7 @@ from pyshark import *
 import scapy.all as scapy
 from scapy.utils import PcapReader,PcapWriter
 import sys
+import os
 sys.path.append('../classify_6/frequent_find')
 import series_find
 import find_one
@@ -35,12 +36,11 @@ class session_deal:
         package_three = []
         length = len(package_one)
         i = 0
-      #  print length
         while(i < length):
             if package_two[i].layers[t_lo].layer_name == protocolname:
                 package_three.append(package_one[i])
             i = i + 1
-        t_writer = PcapWriter('/home/wxw/data/' + 'iec104_pure' + '.pcap', append=True)
+        t_writer = PcapWriter('/home/wxw/data/' + 'modbus_pure' + '.pcap', append=True)
         for p in package_three:
             t_writer.write(p)
         t_writer.flush()
@@ -105,6 +105,24 @@ class session_deal:
                 t_result[t_key].append(data)
         return t_result
 
+    def split_pcap(self,filename,rate):
+        package_pr = scapy.PcapReader(filename)
+        package_one = []
+        i = 1
+        while(True):
+            package = package_pr.read_packet()
+            if package is None:
+                break
+            package_one.append(package)
+        package_pr.close()
+        length = len(package_one)
+        i = 0
+        final_len = int(length * length)
+        t_writer = PcapWriter('/home/wxw/data/Ethernetip/' + 'modbus_pure' + '.pcap', append=True)
+        for p in package_one[0:final_len]:
+            t_writer.write(p)
+        t_writer.flush()
+        t_writer.close()
 
 
 
@@ -116,7 +134,8 @@ class session_deal:
 
 
 data_deal = session_deal('')
-data_deal.noise_remove('/home/wxw/data/iec104_testsp.pcap','104apci',-2)
+data_deal.split_pcap('/home/wxw/data/Ethernetip/cip.pcap',0.1)
+#data_deal.noise_remove('/home/wxw/data/modbus/test_new.pcap','mbtcp',-2)
 
 
 #ss = session_deal('/home/wxw/data/modbus/test_new.pcap')

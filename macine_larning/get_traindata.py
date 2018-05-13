@@ -4,6 +4,7 @@ import numpy as np
 from netzob.all import *
 import struct
 import sys
+import os
 sys.path.append('../classify_6/frequent_find')
 import series_find
 import find_one
@@ -13,7 +14,7 @@ class produce_medata:
         self.onelable = {}
         self.datas = datas
 
-    def get_lable(self,datas,lo_s):
+    def get_lable(self,datas,lo_s,dir):
         t_r = {}
         t_lable = []
         t_value = []
@@ -36,7 +37,7 @@ class produce_medata:
         t_r['lable'] = t_lable
         self.onelable = t_r
         g_r = pd.DataFrame(t_r)
-        g_r.to_csv('/home/wxw/data/iec104_train/lable_total.csv',index=None)
+        g_r.to_csv(os.path.join(dir,'lable_total.csv'),index=None)
 
     def get_loinfo(self):
         l_feature = find_one.frequents_find(self.datas)
@@ -55,19 +56,25 @@ class produce_medata:
         lo_info = pd.DataFrame(t_info)
         return lo_info
 
-    def data_combine(self,data_one,data_two,key):
+    def data_combine(self,data_one,data_two,key,dir):
         data_new = data_one.merge(data_two,on = 'lo')
-        data_new.to_csv('/home/wxw/data/iec104_train/lable_finalone.csv',index=None)
+        data_new.to_csv(os.path.join(dir,'lable_finalone.csv'),index=None)
 
 
 
-def get_train():
-    data = PCAPImporter.readFile('/home/wxw/data/iec104_pure.pcap').values()
+def get_train(dir,locs):
+    data = PCAPImporter.readFile('/home/wxw/data/Ethernetip/cip_perf.pcap').values()
     dd = produce_medata(data)
     t_R = dd.get_loinfo()
-    dd.get_lable(data,[0,6,8])
-    tt = pd.read_csv('/home/wxw/data/iec104_train/lable_total.csv')
-    t_f = dd.data_combine(t_R,tt,'lo')
+    dd.get_lable(data,locs,dir)
+    tt = pd.read_csv(os.path.join(dir,'lable_total.csv'))
+    t_f = dd.data_combine(t_R,tt,'lo',dir)
 
 
-get_train()
+keys = []
+for i in range(0,30):
+    keys.append(i)
+keys.remove(2)
+keys.remove(3)
+
+get_train('/home/wxw/data/cip_train',keys)

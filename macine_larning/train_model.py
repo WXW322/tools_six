@@ -15,6 +15,7 @@ class train_data:
         self.data_wrong = None
         self.data_valid = None
         self.datas = None
+        self.outdata = None
 
     def get_dataset(self):
         data = pd.read_csv(self.filename)
@@ -34,6 +35,28 @@ class train_data:
             self.datas.append(data_temp)
             i = i + 1
         return self.data_right,self.datas
+
+    def get_transdata(self,filename):
+        self.outdata = pd.read_csv(filename)
+
+    def crossvalidate(self,features,lable):
+        i = 0
+        while(i < self.data_num):
+            model_temp = self.models[i]
+            print (model_temp.score(self.data_valid[features],self.data_valid[lable]))
+            i = i + 1
+
+
+    def transvalidate(self,features,lable):
+        i = 0
+        while(i < self.data_num):
+            model_temp = self.models[i]
+            print (model_temp.score(self.outdata[features],self.outdata[lable]))
+            i = i + 1
+
+
+
+
 
     def get_tempdata(self):
         data = pd.read_csv(self.filename)
@@ -77,6 +100,12 @@ class train_data:
             print (model_temp.score(self.data_valid[features],self.data_valid[lable]))
             i = i + 1
 
+    def tran_learning(self,features,lable,out_data):
+        i = 0
+        while(i < self.data_num):
+            model_temp = self.models[i]
+            print (model_temp.score(out_data[features],out_data[lable]))
+            i = i + 1
 
 
 
@@ -84,11 +113,17 @@ class train_data:
 
 
 
-data = pd.read_csv('/home/wxw/data/iec104_train/lable_finalone.csv')
+
+
+
+
+data = pd.read_csv('/home/wxw/data/modbus_train/lable_finalone.csv')
 feature = data.columns.values.tolist()
 feature.remove('value')
 feature.remove('lable')
-tt = train_data(10,'/home/wxw/data/iec104_train/lable_finalone.csv')
+tt = train_data(5,'/home/wxw/data/modbus_train/lable_finalone.csv')
 tt.get_dataset()
 tt.get_models(feature,'lable')
-tt.validate(feature,'lable')
+#tt.validate(feature,'lable')
+tt.get_transdata('/home/wxw/data/iec104_train/lable_finalone.csv')
+tt.transvalidate(feature,'lable')
