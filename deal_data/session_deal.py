@@ -124,6 +124,31 @@ class session_deal:
         t_writer.flush()
         t_writer.close()
 
+    def get_changes(self):
+        src = self.messages[0].source
+        des = self.messages[0].destination
+        i = 0
+        changes = []
+        while(i < len(self.messages)):
+            if (self.messages[i].source == src):
+                j = i + 1
+                while(j < len(self.messages) and self.messages[j].source == src):
+                    j = j + 1
+                if(j - i >= 2):
+                    changes.append(3)
+                else:
+                    changes.append(1)
+                i = j
+            else:
+                j = i + 1
+                while (j < len(self.messages) and self.messages[j].source == des):
+                    j = j + 1
+                if (j - i >= 2):
+                    changes.append(4)
+                else:
+                    changes.append(2)
+                i = j
+        return changes
 
 
 
@@ -133,8 +158,11 @@ class session_deal:
 
 
 
-data_deal = session_deal('')
-data_deal.split_pcap('/home/wxw/data/Ethernetip/cip.pcap',0.1)
+
+
+
+
+#data_deal.split_pcap('/home/wxw/data/Ethernetip/cip.pcap',0.1)
 #data_deal.noise_remove('/home/wxw/data/modbus/test_new.pcap','mbtcp',-2)
 
 
