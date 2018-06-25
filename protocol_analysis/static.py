@@ -18,6 +18,7 @@ class protocol_dis:
     def __init__(self,filename,rootdir):
         if rootdir == '':
             self.datas = PCAPImporter.readFile(filename).values()
+
         else:
             t_paths = os.listdir(rootdir)
             t_length = len(t_paths)
@@ -28,6 +29,8 @@ class protocol_dis:
                 t_fpath.append(t_path)
                 i = i + 1
             self.datas = PCAPImporter.readFiles(t_fpath).values()
+        self.loinfo = {}
+        self.constant = []
 
     def get_lodata(self,t_lo):
         details = {}
@@ -75,6 +78,7 @@ class protocol_dis:
             if(len(data.data) < lo_s + 1):
                 continue
             t_idom = data.data[lo_s]
+            print (t_idom)
             if t_idom not in result:
                 result[t_idom] = 0
             else:
@@ -86,10 +90,33 @@ class protocol_dis:
             t_f = {}
             t_f['x'] = temp_x
             t_f['y'] = temp_y
-        self.get_singlepic(t_f,'/home/wxw/data/protocol_pic/iec104/num','iec104',lo_s)
+        self.get_singlepic(t_f,'/home/wxw/data/protocol_pic/ethernet/num','ethernet',lo_s)
+    def get_loinfo(self):
+        self.t_loinfo = {}
+        for data in self.datas:
+            t_length = len(data.data)
+            i = 0
+            while(i < t_length):
+                if i not in self.t_loinfo:
+                    self.t_loinfo[i] = {}
+                t_node = data.data[i]
+                if t_node not in self.t_loinfo[i]:
+                    self.t_loinfo[i][t_node] = 1
+                else:
+                    self.t_loinfo[i][t_node] = self.t_loinfo[i][t_node] + 1
+                i = i + 1
+    def get_constant(self):
+        for key in self.t_loinfo:
+            if(len(self.t_loinfo[key]) == 1):
+                self.constant.append(key)
 
-pp = protocol_dis('','/home/wxw/data/iec104_init')
-pp.show_lonum(4)
+
+
+#pp = protocol_dis('','/home/wxw/data/Ethernetip/keys')
+#pp.get_loinfo()
+#pp.get_constant()
+#print (pp.constant)
+#pp.show_lonum(0)
 
 
 

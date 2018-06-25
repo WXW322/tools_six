@@ -52,7 +52,7 @@ def r_length(da_str,gap,leixing,encoding):
     return t_co
 
 def check_list(L):
-    print L
+    print (L)
 
 def group_byoff(data_L):
     i = 0
@@ -99,7 +99,7 @@ def t_get_r(t_rate,data):
             T_group_three[key] = T_group_two[key]
             T_count_three[key] = T_count_two[key]
     for key in T_count_three:
-        print key
+        print (key)
 
 #data_T = PCAPImporter.readFile('/home/wxw/data/modbus-new.pcap').values()
 data = get_primedata('/home/wxw/data/dnp3.0')

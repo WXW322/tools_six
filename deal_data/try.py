@@ -61,6 +61,7 @@ def test_rate(result,t_lo,gap):
 
 
 
+"""
 datas = PCAPImporter.readFile('/home/wxw/data/modbus/test_new.pcap').values()
 result = get_evisession(datas,0,2)
 t_time = []
@@ -75,5 +76,6 @@ for key in result:
 tt = np.array(t_time)
 ss = clusession_byt(datas,tt.max())
 print test_rate(ss,0,2)
+"""
 
 

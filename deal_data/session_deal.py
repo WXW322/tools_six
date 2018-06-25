@@ -125,6 +125,10 @@ class session_deal:
         t_writer.close()
 
     def get_changes(self):
+        """
+        change the raw datas to session show
+        :return:
+        """
         src = self.messages[0].source
         des = self.messages[0].destination
         i = 0
@@ -135,18 +139,30 @@ class session_deal:
                 while(j < len(self.messages) and self.messages[j].source == src):
                     j = j + 1
                 if(j - i >= 2):
-                    changes.append(3)
+                    t_message = []
+                    for lo in range(i,j):
+                        t_message.append(self.messages[lo])
+                    changes.append((3,t_message))
                 else:
-                    changes.append(1)
+                    t_message = []
+                    for lo in range(i,j):
+                        t_message.append(self.messages[lo])
+                    changes.append((1,t_message))
                 i = j
             else:
                 j = i + 1
                 while (j < len(self.messages) and self.messages[j].source == des):
                     j = j + 1
                 if (j - i >= 2):
-                    changes.append(4)
+                    t_message = []
+                    for lo in range(i, j):
+                        t_message.append(self.messages[lo])
+                    changes.append((4,t_message))
                 else:
-                    changes.append(2)
+                    t_message = []
+                    for lo in range(i, j):
+                        t_message.append(self.messages[lo])
+                    changes.append((2,t_message))
                 i = j
         return changes
 
@@ -175,7 +191,9 @@ class session_deal:
 #    messages.append(s_s)
 
 
-
+#ss = session_deal('/home/wxw/data/iec104/10.55.37.13110.55.218.2.pcap')
+#cn = ss.get_changes()
+#print (cn)
 #test_it = find_one.frequents_find(messages)
 #test_it.get_detaillo(messages,100)
 #lo_one = test_it.voteforlen(0.88)
