@@ -11,7 +11,7 @@ def do_it():
         messages.append(s_s)
     t_fy = frequents_find(MessageList)
     t_result = t_fy.get_frequentbyte(messages,100,len(messages)/10)
-    print t_result
+    print (t_result)
 
 
 

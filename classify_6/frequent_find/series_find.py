@@ -27,6 +27,12 @@ class series_num:
         return t_result, t_count
 
     def r_length(da_str, gap, leixing, encoding):
+        """
+        :param gap:
+        :param leixing:
+        :param encoding:
+        :return:
+        """
         length = len(da_str)
         i = 0
         t_co = {}
@@ -46,47 +52,32 @@ class series_num:
         return t_co
 
     def get_multisession(self):
-        src = self.sessions[0][0].source
-        des = self.sessions[0][0].destination
+        """
+        split mix sessions by ip and port
+        :return:
+        """
+        src = self.sessions[0].source
+        des = self.sessions[0].destination
         s_lo = 0
         t_lo = 0
+        t_src = []
+        t_des = []
         for session in self.sessions:
-            s_lo = 0
-            t_lo = 0
-            t_len = len(session)
-            i = 0
-            while(i < t_len):
-                if(i == 0):
-                    i = i + 1
-                    continue
-                if session[i].source == src:
-                    if session[i - 1].source == src:
-                        s_lo = s_lo + 1
-                    else:
-                        s_lo = 1
-                        if(t_lo > 3):
-                            t_session = []
-                            while(t_lo > 0):
-                                t_session.append(session[i - t_lo])
-                                t_lo = t_lo - 1
-                            self.consession.append(t_session)
-                        t_lo = 0
+            if session.source == src:
+                t_src.append(session)
+            else:
+                t_des.append(session)
 
-                else:
-                    if(session[i - 1].source == des):
-                        t_lo = t_lo + 1
-                    else:
-                        if(s_lo > 3):
-                            t_session = []
-                            while(s_lo > 0):
-                                t_session.append(session[i - s_lo])
-                                s_lo = s_lo - 1
-                            self.consession.append(t_session)
-                            s_lo = 0
-                i = i + 1
-        return self.consession
+        return t_src,t_des
 
     def r_length(self,da_str,gap,leixing,encoding):
+        """
+        :param da_str:original data
+        :param gap:bytes num
+        :param leixing:big edian or little indian
+        :param encoding:number type
+        :return:t_co location info
+        """
         length = len(da_str)
         i = 0
         t_co = {}
@@ -167,9 +158,12 @@ class series_num:
         return  series_lo
 
 
-
-
-
+"""
+MessageList = PCAPImporter.readFile('/home/wxw/data/iec104/10.55.37.310.55.218.2.pcap').values()
+pp = series_num(MessageList)
+src,des = pp.get_multisession()
+print(src)
+"""
 
 
 

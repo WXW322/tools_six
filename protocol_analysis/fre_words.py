@@ -3,6 +3,7 @@ from treelib import *
 import sys
 sys.path.append('../deal_data')
 import session_deal
+import words_deal
 #caculate the frequent sessions
 class fre_tree:
     def __init__(self):
@@ -326,12 +327,19 @@ class fre_tree:
 
 
 
-"""
+
+
 
 ff = fre_tree()
-ff.split_single(4,'/home/wxw/data/iec104/10.55.37.13110.55.218.2.pcap',0.5)
-print (ff.final_sessions[1])
-"""
+ff.split_single(4,'/home/wxw/data/iec104/10.55.41.210.55.218.1.pcap',0.5)
+#for sess in ff.final_sessions:
+#    for se in sess:
+#        print (se[0])
+#    print ('line')
+MessageList = PCAPImporter.readFile('/home/wxw/data/iec104/10.55.37.13110.55.218.2.pcap').values()
+series_find = words_deal.message_dealer(MessageList)
+series_find.find_const()
+series_find.find_seriesid(ff.final_sessions)
 
 """
 ff = fre_tree()

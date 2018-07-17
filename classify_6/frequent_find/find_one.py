@@ -21,17 +21,39 @@ class frequent_seties:
 class frequents_find:
 
     def __init__(self,MessageList):
+        """
+
+        :param MessageList:protocol messages
+         clusters:locations info
+         single:
+         loinfo:protocol packages location info
+        """
 
         messages = []
         for me in MessageList:
-            s_s = str(me.data)
-            messages.append(s_s)
+            messages.append(me.data)
         self.datas = messages
         self.single = []
         self.cluster = {}
         self.loinfo = []
 
     def get_frequentbyte(self,series_list,head_count,line):
+        """
+
+        :param series_list:messages list
+        :param head_count:the num to caculate
+        :param line:the therehold of the frequent byte
+        :return:location info
+        example:
+         MessageList = PCAPImporter.readFile('/home/wxw/data/iec104_pure.pcap').values()
+         messages = []
+        for me in MessageList:
+           s_s = str(me.data)
+           messages.append(s_s)
+        t_fy = frequents_find(MessageList)
+        t_result = t_fy.get_frequentbyte(messages,100,len(messages)/10)
+        print (t_result)
+        """
         t_result = {}
         t_length = {}
         i = 0
@@ -68,6 +90,13 @@ class frequents_find:
         return t_final_two
 
     def show_str(self,series,head,rate):
+        """
+        get frequent series
+        :param series:
+        :param head:
+        :param rate:
+        :return:
+        """
         result = self.get_frequentbyte(series,head,len(series)/rate)
         str_one = ''
         i = 0
@@ -82,6 +111,11 @@ class frequents_find:
         return str_one
 
     def decode_series(self,t_series):
+        """
+
+        :param t_series:a single message
+        :return: a decoded message s
+        """
         t_length = len(self.cluster)
         print(t_length)
         i = 0
@@ -98,6 +132,13 @@ class frequents_find:
         return t_code
 
     def caculate_num(self,single,sequences,t_len):
+        """
+        get a serie show times in messages
+        :param single:
+        :param sequences:
+        :param t_len:
+        :return:
+        """
         t_time = 0
         for se in sequences:
             i = 0
@@ -112,6 +153,14 @@ class frequents_find:
 
 
     def unlo_find(self,sequences,therehold):
+        """
+        use aprior to find frequent series
+        :param sequences:protocol packages
+        :param therehold:frequent therehold
+        :return:frequent series
+        :youhua tree
+        """
+
         g_r = {}
         g_r[1] = []
         for i in range(0,256):
@@ -121,11 +170,19 @@ class frequents_find:
         t_sum = 0
         for se in sequences:
             t_sum = t_sum + len(se)
+        print (t_sum)
         while(len(g_r[i]) != 0):
+            p = 0
             for single in g_r[i]:
                 t_time = self.caculate_num(single,sequences,i)
+                #print (t_time)
+                #print(single)
                 if(float(t_time)/float(t_sum) < therehold):
+                    p = p + 1
                     g_r[i].remove(single)
+            print ('outone')
+            print (len(g_r[i]))
+            print (i)
             if(len(g_r[i]) == 0):
                 break
             g_r[i + 1] = []
@@ -141,10 +198,11 @@ class frequents_find:
                         if(se_lone[0:i-1] == se_ltwo[1:i]):
                             se_new = se_ltwo
                             se_new.append(se_lone[i-1])
-                g_r[i + 1].append(str(se_new))
+                            g_r[i + 1].append(str(se_new))
             i = i + 1
-
-        print (g_r)
+            #print(g_r[i])
+            #print(i)
+        print('out')
         i = 1
         while(len(g_r[i+1]) > 0):
             t_con = []
@@ -154,8 +212,17 @@ class frequents_find:
                         t_con.append(s_one)
             g_r[i] = s_one
             i = i + 1
+        return t_con
+
 
     def get_detaillo(self,head_count):
+        """
+
+        :param head_count:the head_num to caculate
+        :return: every location infomation
+        example:
+
+        """
         t_result = {}
         t_length = {}
         for series in self.datas:
@@ -178,6 +245,8 @@ class frequents_find:
                 i = i + 1
         for key in t_result:
             t_result[key] = sorted(t_result[key].items(), key=lambda d:d[1], reverse = True)
+            #print (key)
+            #print (t_result[key]
 
         t_final = {}
         length = len(t_result)
@@ -189,6 +258,7 @@ class frequents_find:
             i = i + 1
         t_loinfo = []
         for key in t_final:
+
             t_temp = t_final[key]
             t_rate = float(t_temp[0][3])/float(len(self.datas))
             t_srate = []
@@ -221,6 +291,16 @@ class frequents_find:
         return condidate
 
     def getlobyabs(self,rate_one,rate_two,rate_three,rate_f):
+        """
+        vote for the condidate location
+        :param rate_one:
+        :param rate_two:
+        :param rate_three:
+        :param rate_f:
+        :return:condidate location
+        example:
+        """
+
         vote_r = []
         vote_one = self.voteforlen(rate_one)
         vote_two = self.voteforvalues(rate_two)
@@ -255,6 +335,8 @@ class frequents_find:
 
 
 #MessageList = PCAPImporter.readFile('/home/wxw/data/iec104/10.55.37.310.55.218.2.pcap').values()
+#tt = frequents_find(MessageList)
+#print (tt.get_detaillo(5))
 
 #messages = []
 #mesages_one = []
