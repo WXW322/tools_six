@@ -11,17 +11,29 @@ class ngramtree:
         self.tree :ngram tree
         self.conlosfre:frequent votes
         self.conlosentry:entry votes
+        self.conlosum:sum votes for fre and entry
+        self.baselinelos:baseline locations
         self.reconlosfre:reverse frequent votes
         self.Reconlosentry:reverse Reenrty votes
         self.idoms:vote result
+        self.rightidoms:right idoms
+
+
         """
         self.tree = Tree()
         self.tree.create_node(tag = '0_0',identifier = '0_0',data = [0])
         self.conlosfre = None
         self.conlosentry = None
+        self.conlosum = None
+        self.baselinelos = None
         self.Reconlosfre = None
         self.Reconlosentry = None
         self.idoms = None
+        self.rightidoms = None
+
+
+    def set_right(self,r_idoms):
+        self.rightidoms = r_idoms
 
     def tract(self,name):
         los = name.split('_')
@@ -183,6 +195,8 @@ class ngramtree:
             #print('mm')
             t_fre = t_freone + t_frelast
             t_entry = t_entryone
+            #print(i)
+            #print(t_fre)
             if(t_fre > t_maxfre):
                 t_maxfre = t_fre
                 t_frelo = i
@@ -194,19 +208,15 @@ class ngramtree:
         return t_frelo,t_loen
 
     def vote_locas(self,sequence,L):
-        """
-
-        :param sequence:data
-        :param L: basic idom
-        :return:vote location for data
-        """
         t_len = len(sequence)
         i = L
         t_frelos = []
         t_entrylos = []
         while(i <= t_len):
             t_s = sequence[i-L:i]
+            self.check_se(t_s)
             t_frelo,t_entrylo = self.find_slo(t_s)
+            #print(t_frelo)
             if(t_frelo != -1):
                 t_frelos.append(t_frelo + i - L)
             else:
@@ -297,10 +307,54 @@ class ngramtree:
         self.conlosfre = t_fref
         self.conlosentry = t_entryf
 
+    def get_sumlos(self):
+        """
+        get sum votes for fre and entry
+        :return:
+        """
+        t_sumlos = {}
+        for key in self.conlosfre:
+            if key not in t_sumlos:
+                t_sumlos[key] = self.conlosfre[key]
+            else:
+                t_sumlos[key] = t_sumlos[key] + self.conlosfre[key]
+        for key in self.conlosentry:
+            if key not in t_sumlos:
+                t_sumlos[key] = self.conlosentry[key]
+            else:
+                t_sumlos[key] = t_sumlos[key] + self.conlosentry[key]
+        self.conlosum = t_sumlos
+        return self.conlosum
+
+    def baseline(self):
+        """
+        vote accord the baseline VE ways
+        :return:vote result
+        """
+        t_baselinelos = []
+        for key in self.conlosum:
+            prekey = key - 1
+            lastkey = key + 1
+            nownum = self.conlosum[key]
+            if(prekey not in self.conlosum):
+                prenum = 0
+            else:
+                prenum = self.conlosum[prekey]
+            if lastkey not in self.conlosum:
+                lastnum = 0
+            else:
+                lastnum = self.conlosum[lastkey]
+            if(nownum > prenum and nownum > lastnum):
+                t_baselinelos.append(key)
+        self.baselinelos = t_baselinelos
+
+
+
+
+
 
     def get_Reconlos(self,messages,L):
         """
-
         :param messages:messages data
         :return:vote locations ascent reverse
         """
@@ -367,6 +421,27 @@ class ngramtree:
         #self.idoms = t_idoms
         return t_idoms
 
+    def get_rightscore(self,t_r,t_c,score_l):
+        """
+        caculate the ways finds score
+        :param t_r:right point
+        :param t_c:condidate point
+        :param score_l:score
+        :return:
+        """
+        t_score = 0
+        for r_diom in t_r:
+            if (r_diom[0] > score_l):
+                break
+            for c_idom in t_c:
+                if(c_idom[0] > score_l):
+                    continue
+                if(r_diom[0] == c_idom[0] and r_diom[1] == c_idom[1]):
+                    t_score = t_score + 1
+        print (t_score/len(t_r))
+
+
+
 
 
 
@@ -391,80 +466,3 @@ class ngramtree:
             t_h = t_h + 1
         t_hnodes.sort(key = self.get_key,reverse=True)
         return t_hnodes
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-MessageList = PCAPImporter.readFile('/home/wxw/data/modbus/test_new.pcap').values()
-t_messages = []
-for message in MessageList:
-    t_messages.append(message.data)
-
-t_datas = []
-j = 0
-for t_message in t_messages:
-    t_len = len(t_message)
-    i = 0
-    t_temp = []
-    while(i < t_len):
-        t_temp.append(t_message[i])
-        i = i + 1
-    t_temp.reverse()
-    t_datas.append(t_temp)
-
-#for idom in t_datas:
-#    print (idom)
-ngram = ngramtree()
-ngram.build_tree(t_messages,3)
-ngram.caculate_prob()
-ngram.get_conlos(t_messages,3)
-t_fres,t_entrys = ngram.get_locationbycondition(1000)
-#print(t_fres)
-#print (ngram.get_idoms(t_fres))
-#print (ngram.idoms)
-print('aa')
-print(t_entrys)
-#print(ngram.conlosfre)
-print(ngram.get_idoms(t_entrys))
-
-Rngram = ngramtree()
-Rngram.build_tree(t_datas,3)
-Rngram.caculate_prob()
-Rngram.get_Reconlos(t_datas,3)
-t_re = Rngram.get_Relocationbycon(1000)
-print(t_re)
-print (Rngram.get_idoms(t_re))
-#print (ngram.get_locationbycondition(1000))
-#ngram.print_htree()
-#t_hnodes = ngram.get_frequentse(0)
-#for t_h in t_hnodes:
-#    print (t_h)
-#frelos,entrylos = ngram.vote_locas(t_messages[0],3)
-#ngram.check_se(t_messages[1])
-#print (frelos)
-#print (entrylos)
-
-

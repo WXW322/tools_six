@@ -82,6 +82,10 @@ class ngramtree:
 
 
     def caculate_prob(self):
+        """
+        caculate prob of each node
+        :return:
+        """
         t_H = self.tree.depth()
         t_h = 1
         while(t_h <= t_H):
@@ -102,8 +106,14 @@ class ngramtree:
                 t_node.data.append(-t_shang)
             for t_n in t_hnodes:
                 t_node = self.tree.get_node(t_n)
-                t_node.data.append(t_node.data[0] / t_sum)
-                t_hpro.append(t_node.data[0]/t_sum)
+                t_parentnode = self.tree.parent(t_n)
+                if t_h > 1:
+                    t_node.data.append((t_node.data[0] / t_sum) * (t_node.data[0]/t_parentnode.data[0]))
+                    t_hpro.append((t_node.data[0]/t_sum) * (t_node.data[0]/t_parentnode.data[0]))
+                else:
+                    t_node.data.append((t_node.data[0] / t_sum))
+                    t_hpro.append((t_node.data[0] / t_sum))
+
                 t_cpro.append(t_node.data[1])
             t_ndata = np.array(t_hpro)
             mean = np.mean(t_ndata)
@@ -118,6 +128,7 @@ class ngramtree:
                 else:
                     t_node.data[2] = (t_node.data[2] - mean)
                 if(mean_s == 0 and std_s ==0):
+                    t_node.data[1] = -100.0
                     continue
                 t_node.data[1] = (t_node.data[1] - mean_s)/std_s
             t_h = t_h + 1
@@ -152,6 +163,13 @@ class ngramtree:
             i = i + 1
         print("")
 
+    def check_childs(self,name):
+        t_childrens = self.tree.children(name)
+        for child in t_childrens:
+            print(child.identifier + ' ' + str(child.data),end='!')
+        print("")
+
+
     def find_slo(self,aa):
         tt_l = len(aa)
         j = 0
@@ -183,6 +201,8 @@ class ngramtree:
             #print('mm')
             t_fre = t_freone + t_frelast
             t_entry = t_entryone
+            #print(i)
+            #print(t_fre)
             if(t_fre > t_maxfre):
                 t_maxfre = t_fre
                 t_frelo = i
@@ -193,20 +213,57 @@ class ngramtree:
         #print (t_frelo,t_loen)
         return t_frelo,t_loen
 
-    def vote_locas(self,sequence,L):
-        """
+    def find_sloentry(self, aa):
+        tt_l = len(aa)
+        j = 0
+        self.check_se(aa)
+        t_len = len(aa)
+        i = 1
+        t_maxfre = -1000
+        t_frelo = -1
+        t_maxent = -1000
+        t_loen = -1
+        while (i <= t_len):
+            print (i)
+            pre = aa[:i]
+            if (i < t_len):
+                last = aa[i:]
+            else:
+                last = ''
+            print ('prestart')
+            self.check_se(pre)
+            t_freone, t_entryone = self.query_info(pre)
+            # print(t_frelo)
+            print(t_entryone)
+            print('preend')
+            # print('mm')
+            self.check_se(last)
+            t_frelast, t_enlast = self.query_info(last)
+            t_fre = t_freone + t_frelast
+            t_entry = t_entryone
+            # print(i)
+            # print(t_fre)
+            if (t_fre > t_maxfre):
+                t_maxfre = t_fre
+                t_frelo = i
+            if (t_entry > t_maxent):
+                t_maxent = t_entry
+                t_loen = i
+            i = i + 1
+        print (t_frelo,t_loen)
+        return t_frelo, t_loen
 
-        :param sequence:data
-        :param L: basic idom
-        :return:vote location for data
-        """
+    def vote_locas(self,sequence,L):
         t_len = len(sequence)
         i = L
         t_frelos = []
         t_entrylos = []
         while(i <= t_len):
             t_s = sequence[i-L:i]
+            #self.check_se(t_s)
             t_frelo,t_entrylo = self.find_slo(t_s)
+            #print(t_frelo)
+            #sys.exit()
             if(t_frelo != -1):
                 t_frelos.append(t_frelo + i - L)
             else:
@@ -293,6 +350,7 @@ class ngramtree:
                 else:
                     t_entryf[temp_entry[i]] = t_entryf[temp_entry[i]] + 1
                 i = i + 1
+        t_fref[1] = t_fref[1]*2
 
         self.conlosfre = t_fref
         self.conlosentry = t_entryf
@@ -336,11 +394,47 @@ class ngramtree:
         t_entrysplits = []
         for key in self.conlosfre:
             if self.conlosfre[key] > times:
+
                 t_fresplits.append(key)
         for key in self.conlosentry:
             if self.conlosentry[key] > times:
                 t_entrysplits.append(key)
         return t_fresplits,t_entrysplits
+
+    def getlocationbyneibor(self,times):
+        t_fresplits = []
+        t_entrysplits = []
+        for key in self.conlosfre:
+            prekey = key - 1
+            nexkey = key + 1
+            nownum = self.conlosfre[key]
+            if prekey not in self.conlosfre:
+                prenum  = 0
+            else:
+                prenum = self.conlosfre[prekey]
+            if nexkey not in self.conlosfre:
+                nextnum = 0
+            else:
+                nextnum = self.conlosfre[nexkey]
+
+            if(prenum ==0):
+                if nownum > times:
+                    t_fresplits.append(key)
+                continue
+            elif((nownum > prenum) and (nownum - prenum)/prenum > 0.1):
+                t_fresplits.append(key)
+                continue
+            if(nextnum == 0):
+                if(nextnum > times):
+                    t_fresplits.append(key)
+                continue
+            elif((nownum > nextnum) and (nownum - nextnum)/nextnum > 0.1):
+                t_fresplits.append(key)
+                continue
+        for key in self.conlosentry:
+            if self.conlosentry[key] > times:
+                t_entrysplits.append(key)
+        return t_fresplits, t_entrysplits
 
     def get_locationbylocal(self,entrys):
         print ('aaa')
@@ -391,80 +485,3 @@ class ngramtree:
             t_h = t_h + 1
         t_hnodes.sort(key = self.get_key,reverse=True)
         return t_hnodes
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-MessageList = PCAPImporter.readFile('/home/wxw/data/modbus/test_new.pcap').values()
-t_messages = []
-for message in MessageList:
-    t_messages.append(message.data)
-
-t_datas = []
-j = 0
-for t_message in t_messages:
-    t_len = len(t_message)
-    i = 0
-    t_temp = []
-    while(i < t_len):
-        t_temp.append(t_message[i])
-        i = i + 1
-    t_temp.reverse()
-    t_datas.append(t_temp)
-
-#for idom in t_datas:
-#    print (idom)
-ngram = ngramtree()
-ngram.build_tree(t_messages,3)
-ngram.caculate_prob()
-ngram.get_conlos(t_messages,3)
-t_fres,t_entrys = ngram.get_locationbycondition(1000)
-#print(t_fres)
-#print (ngram.get_idoms(t_fres))
-#print (ngram.idoms)
-print('aa')
-print(t_entrys)
-#print(ngram.conlosfre)
-print(ngram.get_idoms(t_entrys))
-
-Rngram = ngramtree()
-Rngram.build_tree(t_datas,3)
-Rngram.caculate_prob()
-Rngram.get_Reconlos(t_datas,3)
-t_re = Rngram.get_Relocationbycon(1000)
-print(t_re)
-print (Rngram.get_idoms(t_re))
-#print (ngram.get_locationbycondition(1000))
-#ngram.print_htree()
-#t_hnodes = ngram.get_frequentse(0)
-#for t_h in t_hnodes:
-#    print (t_h)
-#frelos,entrylos = ngram.vote_locas(t_messages[0],3)
-#ngram.check_se(t_messages[1])
-#print (frelos)
-#print (entrylos)
-
-

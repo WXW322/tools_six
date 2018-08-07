@@ -188,7 +188,7 @@ class fre_tree:
             if i in t_los:
                 i = i + 1
                 continue
-           # self.singles.append(self.idoms[i])
+           #    self.singles.append(self.idoms[i])
             t_los.append(i)
             j = i + 1
             while(j < t_len):
@@ -303,6 +303,8 @@ class fre_tree:
         self.regettree()
         self.Ntrees.show()
         self.split_session(cn)
+
+
 
 
 

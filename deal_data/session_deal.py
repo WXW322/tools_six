@@ -178,6 +178,8 @@ class session_deal:
 
 
 
+
+
 #data_deal.split_pcap('/home/wxw/data/Ethernetip/cip.pcap',0.1)
 #data_deal.noise_remove('/home/wxw/data/modbus/test_new.pcap','mbtcp',-2)
 

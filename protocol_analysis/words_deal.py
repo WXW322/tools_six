@@ -28,12 +28,6 @@ class message_dealer:
                 self.const.append(i)
             i = i + 1
 
-
-
-
-
-
-
     def find_senum(self,Mone,Mtwo,gap,leixing,encoding):
         # delevepe effective add direction
         length_one = len(Mone.data)

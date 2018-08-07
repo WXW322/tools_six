@@ -1,11 +1,12 @@
 from netzob.all import *
 from treelib import *
+import numpy as np
 import sys
 
 
-def find_layer(h):
 
-
-tt = Tree()
-tt.create_node(tag = 'n00', identifier = 'n00' ,data = (10,20))
-tt.show()
+data = np.array([0.4,0.2,0.1,0.1,0.2])
+mean = np.mean(data)
+std = np.std(data,ddof = 1)
+data = (data-mean)/std
+print (data)
