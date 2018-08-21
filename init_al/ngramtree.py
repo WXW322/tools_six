@@ -17,6 +17,7 @@ class ngramtree:
         self.Reconlosentry:reverse Reenrty votes
         self.idoms:vote result
         self.rightidoms:right idoms
+        self.cnt:diffrent num
 
 
         """
@@ -30,6 +31,7 @@ class ngramtree:
         self.Reconlosentry = None
         self.idoms = None
         self.rightidoms = None
+        self.cnt = 0
 
 
     def set_right(self,r_idoms):
@@ -40,12 +42,17 @@ class ngramtree:
         return los
 
     def addnode(self,p_name,n_num,depth):
-        name = str(depth) + '_' + str(n_num) + '_' + self.tract(p_name)[1]
-        if(self.tree.contains(name)):
-            t_node = self.tree.get_node(name)
-            t_node.data[0] = t_node.data[0] + 1
-        else:
-            self.tree.create_node(tag = name,identifier = name,data = [1],parent = p_name)
+        t_is = 0
+        for child in self.tree.children(p_name):
+            if (int(self.tract(child.identifier)[1]) == n_num):
+                name = child.identifier
+                t_is = 1
+                child.data[0] = child.data[0] + 1
+                break
+        if t_is == 0:
+            self.cnt = self.cnt + 1
+            name = str(depth) + '_' + str(n_num) + '_' + str(self.cnt)
+            self.tree.create_node(tag=name, identifier=name, data=[1], parent=p_name)
         return name
 
     def add_sequence(self,sequence):
@@ -74,15 +81,26 @@ class ngramtree:
         for node in self.tree.all_nodes():
             print (node.identifier + '  ' + str(node.data))
 
+    def print_node(self,nid):
+        t_pre = ""
+        t_pre = t_pre + self.tract(nid)[1]
+        t_p = self.tree.parent(nid)
+        while(t_p.identifier != '0_0'):
+            t_pre = t_pre + '_' + self.tract(t_p.identifier)[1]
+            t_p = self.tree.parent(t_p.identifier)
+        print(t_pre,self.tree.get_node(nid).data)
+
     def print_htree(self):
         t_H = self.tree.depth()
         t_h = 1
-        while(t_h <= t_H):
+        while (t_h <= t_H):
             t_nodes = self.get_h(t_h)
-            #print(t_h)
+            # print(t_h)
             for t_node in t_nodes:
                 t_node = self.tree.get_node(t_node)
-                print (t_node.identifier + ' ' + str(t_node.data))
+                self.print_node(t_node.identifier)
+                # print (t_node.identifier + ' ' + str(t_node.data))
+
             t_h = t_h + 1
 
     def get_h(self,h):
@@ -114,8 +132,8 @@ class ngramtree:
                 t_node.data.append(-t_shang)
             for t_n in t_hnodes:
                 t_node = self.tree.get_node(t_n)
-                t_node.data.append(t_node.data[0] / t_sum)
-                t_hpro.append(t_node.data[0]/t_sum)
+                t_node.data.append(-np.log(t_node.data[0] / t_sum))
+                t_hpro.append(-np.log(t_node.data[0]/t_sum))
                 t_cpro.append(t_node.data[1])
             t_ndata = np.array(t_hpro)
             mean = np.mean(t_ndata)
@@ -171,7 +189,7 @@ class ngramtree:
         #self.check_se(aa)
         t_len = len(aa)
         i = 1
-        t_maxfre = -1000
+        t_minfre = 1000
         t_frelo = -1
         t_maxent = -1000
         t_loen = -1
@@ -197,8 +215,8 @@ class ngramtree:
             t_entry = t_entryone
             #print(i)
             #print(t_fre)
-            if(t_fre > t_maxfre):
-                t_maxfre = t_fre
+            if(t_fre < t_minfre):
+                t_minfre = t_fre
                 t_frelo = i
             if(t_entry > t_maxent):
                 t_maxent = t_entry
@@ -214,7 +232,7 @@ class ngramtree:
         t_entrylos = []
         while(i <= t_len):
             t_s = sequence[i-L:i]
-            self.check_se(t_s)
+            #self.check_se(t_s)
             t_frelo,t_entrylo = self.find_slo(t_s)
             #print(t_frelo)
             if(t_frelo != -1):
@@ -438,6 +456,8 @@ class ngramtree:
                     continue
                 if(r_diom[0] == c_idom[0] and r_diom[1] == c_idom[1]):
                     t_score = t_score + 1
+        print (t_score)
+
         print (t_score/len(t_r))
 
 

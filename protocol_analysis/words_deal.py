@@ -5,6 +5,7 @@ import math
 import os
 import sys
 import words_basic
+import numpy as np
 
 class message_dealer:
     def __init__(self,messages):
@@ -27,6 +28,108 @@ class message_dealer:
             if(t_max / t_tol >= 0.95):
                 self.const.append(i)
             i = i + 1
+
+    def find_constone(self,lo_b,lo_e):
+        #develop absolute or relative
+        conster = words_basic.words_base()
+        t_messages = []
+        for message in self.messages:
+            t_messages.append(message.data)
+        t_r,t_l,_ = conster.get_logapinfo(t_messages,lo_b,lo_e)
+        if(t_l[0][1] > 0.98):
+            return 1
+        else:
+            return 0
+
+    def pearson(self,vector1, vector2):
+        n = len(vector1)
+        # simple sums
+        sum1 = sum(float(vector1[i]) for i in range(n))
+        sum2 = sum(float(vector2[i]) for i in range(n))
+        # sum up the squares
+        sum1_pow = sum([pow(v, 2.0) for v in vector1])
+        sum2_pow = sum([pow(v, 2.0) for v in vector2])
+        # sum up the products
+        p_sum = sum([vector1[i] * vector2[i] for i in range(n)])
+        # 分子num，分母den
+        num = p_sum - (sum1 * sum2 / n)
+        den = math.sqrt((sum1_pow - pow(sum1, 2) / n) * (sum2_pow - pow(sum2, 2) / n))
+        if den == 0:
+            return 0.0
+        return num / den
+
+    def caculate_prob(self,vector):
+        t_r = {}
+        for v in vector:
+            if v not in t_r:
+                t_r[v] = 1
+            else:
+                t_r[v] = t_r[v] + 1
+        for key in t_r:
+            t_r[key] = t_r[key]/len(vector)
+        return t_r
+
+
+    def huxinxi(self,vectorone,vectortwo):
+        vectorthree = []
+        for i in range(len(vectorone)):
+            vectorthree.append((vectorone[i],vectortwo[i]))
+        t_probone = self.caculate_prob(vectorone)
+        t_probtwo = self.caculate_prob(vectortwo)
+        t_probsum = self.caculate_prob(vectorthree)
+        t_info = 0
+        for key_one in t_probone:
+            for key_two in t_probtwo:
+                t_info = t_info + t_probsum[(key_one,key_two)]*np.log(t_probsum(key_one,key_two)/(t_probone[key_one]*t_probtwo[key_two]))
+        return t_info
+
+
+
+    def find_len(self,datas,lo_s,lo_e):
+        t_lener = words_basic.words_base()
+        t_messages = []
+        for message in self.messages:
+            t_messages.append(message.data)
+        t_dataone,t_datatwo,t_lens = t_lener.get_lengthinfo(t_messages,lo_s,lo_e)
+        print(t_datatwo)
+        print(t_lens)
+        p_one = self.pearson(t_dataone,t_lens)
+        p_two = self.pearson(t_datatwo,t_lens)
+        print(p_one)
+        print(p_two)
+        if(p_one > 0.9 or p_two > 0.9):
+            return 1
+        else:
+            return 0
+
+    def find_lenbyaccu(self,datas,lo_s,lo_e):
+        t_lener = words_basic.words_base()
+        t_messages = []
+        for message in self.messages:
+            t_messages.append(message.data)
+        t_dataone, t_datatwo, t_lens = t_lener.get_lengthinfo(t_messages, lo_s, lo_e)
+        print(t_datatwo)
+        print(t_lens)
+        acc_big = 0
+        for i in range(len(t_dataone)):
+            if(abs((t_dataone[i] - t_lens[i])) <= 1):
+                acc_big = acc_big + 1
+        acc_small = 0
+        for i in range(len(t_datatwo)):
+            if(abs((t_datatwo[i] - t_lens[i])) <= 1):
+                acc_small = acc_small + 1
+        print (acc_big)
+        print (acc_small)
+        print (len(t_dataone))
+        if((acc_small/len(t_dataone)) > 0.8 or (acc_big / len(t_dataone)) > 0.8):
+            return 1
+        else:
+            return 0
+
+
+
+
+
 
     def find_senum(self,Mone,Mtwo,gap,leixing,encoding):
         # delevepe effective add direction
@@ -146,12 +249,12 @@ class message_dealer:
                         print(key)
 
 
-
-#MessageList = PCAPImporter.readFile('/home/wxw/data/modbus/test_new.pcap').values()
-#dealer = message_dealer(MessageList)
-#dealer.find_const()
-#print (dealer.const)
-
+"""
+MessageList = PCAPImporter.readFile('/home/wxw/data/modbus/test_new.pcap').values()
+dealer = message_dealer(MessageList)
+dealer.find_constone()
+print (dealer.const)
+"""
 
 
 

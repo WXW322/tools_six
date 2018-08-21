@@ -23,14 +23,15 @@ def classify_bysrc(file_name):
             t_results[get_srcip(p) + get_dstip(p)].append(p)
     for key in t_results:
         t_temp = t_results[key]
-        t_writer = PcapWriter('/home/wxw/data/modbus/' + key + '.pcap',append=True)
+        t_writer = PcapWriter('/home/wxw/data/modbusdata/' + key + '.pcap',append=True)
         for p in t_results[key]:
             t_writer.write(p)
         t_writer.flush()
         t_writer.close()
 
 
-package = scapy.rdpcap('/home/wxw/data/ModbusTCP.pcap')
+#package = scapy.rdpcap('/home/wxw/data/modbusdata.pcap')
+classify_bysrc('/home/wxw/data/modbusdata.pcap')
 
 
 

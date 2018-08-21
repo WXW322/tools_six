@@ -15,6 +15,8 @@ class ngramtree:
         self.Reconlosentry:reverse Reenrty votes
         self.idoms:vote result
         self.rightidoms:right idoms
+        self.fresplits:fre locations
+        self.entrysplits;entry locations
         """
         self.tree = Tree()
         self.tree.create_node(tag = '0_0',identifier = '0_0',data = [0])
@@ -24,6 +26,9 @@ class ngramtree:
         self.Reconlosentry = None
         self.idoms = None
         self.rightidoms = None
+        self.cnt = 0
+        self.fresplits = None
+        self.entrysplits = None
 
 
 
@@ -35,12 +40,17 @@ class ngramtree:
         return los
 
     def addnode(self,p_name,n_num,depth):
-        name = str(depth) + '_' + str(n_num) + '_' + self.tract(p_name)[1]
-        if(self.tree.contains(name)):
-            t_node = self.tree.get_node(name)
-            t_node.data[0] = t_node.data[0] + 1
-        else:
-            self.tree.create_node(tag = name,identifier = name,data = [1],parent = p_name)
+        t_is = 0
+        for child in self.tree.children(p_name):
+            if (int(self.tract(child.identifier)[1]) == n_num):
+                name = child.identifier
+                t_is = 1
+                child.data[0] = child.data[0] + 1
+                break
+        if t_is == 0:
+            self.cnt = self.cnt + 1
+            name = str(depth) + '_' + str(n_num) + '_' + str(self.cnt)
+            self.tree.create_node(tag=name, identifier=name, data=[1], parent=p_name)
         return name
 
     def add_sequence(self,sequence):
@@ -66,19 +76,57 @@ class ngramtree:
                 i = i + 1
 
     def print_tree(self):
+        """
+        print all nodes
+        :return:
+        """
         for node in self.tree.all_nodes():
             print (node.identifier + '  ' + str(node.data))
 
+    def print_node(self,nid):
+        t_pre = ""
+        t_pre = t_pre + self.tract(nid)[1]
+        t_p = self.tree.parent(nid)
+        while(t_p.identifier != '0_0'):
+            t_pre = t_pre + '_' + self.tract(t_p.identifier)[1]
+            t_p = self.tree.parent(t_p.identifier)
+        print(t_pre,self.tree.get_node(nid).data)
+
     def print_htree(self):
+        """
+        print tree according to height
+        :return:
+        """
         t_H = self.tree.depth()
         t_h = 1
-        while(t_h <= t_H):
+        while (t_h <= t_H):
             t_nodes = self.get_h(t_h)
-            #print(t_h)
+            # print(t_h)
             for t_node in t_nodes:
                 t_node = self.tree.get_node(t_node)
-                print (t_node.identifier + ' ' + str(t_node.data))
+                self.print_node(t_node.identifier)
+                # print (t_node.identifier + ' ' + str(t_node.data))
+
             t_h = t_h + 1
+
+    def get_hnodes(self,h):
+        """
+        get all h nodes childern info
+        :param h:
+        :return:
+        """
+        t_nodes = self.get_h(h)
+        for t_node in t_nodes:
+            print(t_node.identifier,t_node.data[0],end = '!')
+            t_children = self.tree.children(t_node.identifier)
+            for t_c in t_children:
+                print(t_c.data[0],end = ',')
+            print("")
+
+
+
+
+
 
     def get_h(self,h):
         t_nodes = []
@@ -115,8 +163,8 @@ class ngramtree:
                 t_node = self.tree.get_node(t_n)
                 t_parentnode = self.tree.parent(t_n)
                 if t_h > 1:
-                    t_node.data.append((t_node.data[0] / t_sum) * (t_node.data[0]/t_parentnode.data[0]))
-                    t_hpro.append((t_node.data[0]/t_sum) * (t_node.data[0]/t_parentnode.data[0]))
+                    t_node.data.append((t_node.data[0] / t_sum))
+                    t_hpro.append((t_node.data[0]/t_sum))
                 else:
                     t_node.data.append((t_node.data[0] / t_sum))
                     t_hpro.append((t_node.data[0] / t_sum))
@@ -277,7 +325,8 @@ class ngramtree:
             if (t_entrylo != -1):
                 t_entrylos.append(t_len - (t_entrylo + j))
             else:
-                t_entrylos.append(-1)
+                t_entrylos.appen
+                d(-1)
             j = j + 1
 
         return t_frelos,t_entrylos
@@ -288,7 +337,7 @@ class ngramtree:
         """
 
         :param messages:messages data
-        :return:vote locations ascent reverse
+        :return:vote locations ascent rever   se
         """
         t_fref = {}
         t_entryf = {}
@@ -310,7 +359,8 @@ class ngramtree:
                 else:
                     t_entryf[temp_entry[i]] = t_entryf[temp_entry[i]] + 1
                 i = i + 1
-        t_fref[1] = t_fref[1]*2
+        if 1 in t_fref:
+            t_fref[1] = t_fref[1]*2
 
         self.conlosfre = t_fref
         self.conlosentry = t_entryf
@@ -391,10 +441,36 @@ class ngramtree:
             elif((nownum > nextnum) and (nownum - nextnum)/nextnum > 0.1):
                 t_fresplits.append(key)
                 continue
+
         for key in self.conlosentry:
-            if self.conlosentry[key] > times:
+            en_prekey = key - 1
+            en_nextkey = key + 1
+            if en_prekey not  in self.conlosentry:
+                en_prenum = 0
+            else:
+                en_prenum = self.conlosentry[en_prekey]
+            if en_nextkey not in self.conlosentry:
+                en_nextnum = 0
+            else:
+                en_nextnum = self.conlosentry[en_nextkey]
+            en_nownum = self.conlosentry[nownum]
+            if(en_prenum == 0 or en_nextnum == 0):
+                continue
+            if(en_nownum > en_prenum and (en_nownum - en_prenum)/en_prenum > 0.1 and en_nownum > en_nextnum and (en_nownum - en_nextnum)/en_nextnum > 0.1):
                 t_entrysplits.append(key)
+            self.fresplits = t_fresplits
+            self.entrysplits = t_entrysplits
         return t_fresplits, t_entrysplits
+
+    def merge_splits(self):
+        t_combinelos = set()
+        for f_lo in self.fresplits:
+            t_combinelos.add(f_lo)
+        for e_lo in self.entrysplits:
+            t_combinelos.add(e_lo)
+        return list(t_combinelos)
+
+
 
     def get_locationbylocal(self,entrys):
         print ('aaa')

@@ -73,6 +73,11 @@ class ngramtree:
                 print (t_node.identifier + ' ' + str(t_node.data))
             t_h = t_h + 1
 
+    def get_hnodes(self,h):
+        t_nodes = self.get_h(h)
+        for t_node in t_nodes:
+            self.check_childs(t_node)
+
     def get_h(self,h):
         t_nodes = []
         for node in self.tree.all_nodes():
@@ -155,6 +160,17 @@ class ngramtree:
         else:
             return self.tree.get_node(t_root).data[2],self.tree.get_node(t_root).data[1]
 
+    def get_hnodes(self,h):
+        """
+        get all h nodes childern info
+        :param h:
+        :return:
+        """
+        t_nodes = self.get_h(h)
+        for t_node in t_nodes:
+            t_node = self.tree.get_node(t_node)
+            self.check_childs(t_node.identifier)
+
     def check_se(self,element):
         t_len = len(element)
         i = 0
@@ -164,6 +180,8 @@ class ngramtree:
         print("")
 
     def check_childs(self,name):
+        t_node = self.tree.get_node(name)
+        print(t_node.identifier + ' ' + str(t_node.data), end='!')
         t_childrens = self.tree.children(name)
         for child in t_childrens:
             print(child.identifier + ' ' + str(child.data),end='!')

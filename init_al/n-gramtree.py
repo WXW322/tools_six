@@ -22,19 +22,35 @@ class ngramtree:
         self.Reconlosfre = None
         self.Reconlosentry = None
         self.idoms = None
+        self.cnt = 0
 
     def tract(self,name):
         los = name.split('_')
         return los
 
     def addnode(self,p_name,n_num,depth):
-        name = str(depth) + '_' + str(n_num) + '_' + self.tract(p_name)[1]
-        if(self.tree.contains(name)):
-            t_node = self.tree.get_node(name)
-            t_node.data[0] = t_node.data[0] + 1
-        else:
+        t_is = 0
+        for child in self.tree.children(p_name):
+            if(int(self.tract(child.identifier)[1]) == n_num):
+                name = child.identifier
+                t_is = 1
+                child.data[0] = child.data[0] + 1
+                break
+        if t_is == 0:
+            self.cnt = self.cnt + 1
+            name = str(depth) + '_' + str(n_num) + '_' + str(self.cnt)
             self.tree.create_node(tag = name,identifier = name,data = [1],parent = p_name)
         return name
+
+
+        #name = str(depth) + '_' + str(n_num)
+
+        #if(self.tree.contains(name)):
+        #    t_node = self.tree.get_node(name)
+        #    t_node.data[0] = t_node.data[0] + 1
+        #else:
+        #    self.tree.create_node(tag = name,identifier = name,data = [1],parent = p_name)
+        #return name
 
     def add_sequence(self,sequence):
         t_len = len(sequence)
@@ -62,6 +78,15 @@ class ngramtree:
         for node in self.tree.all_nodes():
             print (node.identifier + '  ' + str(node.data))
 
+    def print_node(self,nid):
+        t_pre = ""
+        t_pre = t_pre + self.tract(nid)[1]
+        t_p = self.tree.parent(nid)
+        while(t_p.identifier != '0_0'):
+            t_pre = t_pre + '_' + self.tract(t_p.identifier)[1]
+            t_p = self.tree.parent(t_p.identifier)
+        print(t_pre,self.tree.get_node(nid).data)
+
     def print_htree(self):
         t_H = self.tree.depth()
         t_h = 1
@@ -70,7 +95,9 @@ class ngramtree:
             #print(t_h)
             for t_node in t_nodes:
                 t_node = self.tree.get_node(t_node)
-                print (t_node.identifier + ' ' + str(t_node.data))
+                self.print_node(t_node.identifier)
+                #print (t_node.identifier + ' ' + str(t_node.data))
+
             t_h = t_h + 1
 
     def get_h(self,h):
@@ -412,11 +439,17 @@ class ngramtree:
 
 
 
+ngram = ngramtree()
+
+ngram.build_tree([[1,2,3,4,1,4,3,2,3,3],[2,1,2,3,4]],3)
+ngram.caculate_prob()
+ngram.print_htree()
 
 
 
 
 
+"""
 
 MessageList = PCAPImporter.readFile('/home/wxw/data/modbus/test_new.pcap').values()
 t_messages = []
@@ -437,13 +470,15 @@ for t_message in t_messages:
 
 #for idom in t_datas:
 #    print (idom)
+"""
+"""
 ngram = ngramtree()
 ngram.build_tree(t_messages,3)
 ngram.caculate_prob()
 ngram.get_conlos(t_messages,3)
 t_fres,t_entrys = ngram.get_locationbycondition(1000)
-#print(t_fres)
-#print (ngram.get_idoms(t_fres))
+print(t_fres)
+print (ngram.get_idoms(t_fres))
 #print (ngram.idoms)
 print('aa')
 print(t_entrys)
@@ -466,5 +501,6 @@ print (Rngram.get_idoms(t_re))
 #ngram.check_se(t_messages[1])
 #print (frelos)
 #print (entrylos)
+"""
 
 
