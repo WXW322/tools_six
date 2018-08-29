@@ -453,7 +453,7 @@ class ngramtree:
                 en_nextnum = 0
             else:
                 en_nextnum = self.conlosentry[en_nextkey]
-            en_nownum = self.conlosentry[nownum]
+            en_nownum = self.conlosentry[key]
             if(en_prenum == 0 or en_nextnum == 0):
                 continue
             if(en_nownum > en_prenum and (en_nownum - en_prenum)/en_prenum > 0.1 and en_nownum > en_nextnum and (en_nownum - en_nextnum)/en_nextnum > 0.1):

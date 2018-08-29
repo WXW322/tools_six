@@ -10,7 +10,8 @@ from matplotlib import pyplot as plt
 
 class words_base:
     def __init__(self):
-        print ('xxx')
+        self.tt = None
+
 
     def get_loinfo(self,series_list,head_count):
         t_result = {}
@@ -40,6 +41,13 @@ class words_base:
         return t_result,t_length
 
     def get_logapinfo(self,series_list,lo_s,lo_e):
+        """
+
+        :param series_list:series data
+        :param lo_s: start location
+        :param lo_e:end location
+        :return:prob info
+        """
         t_result = {}
         t_prob = {}
         i = 0
@@ -70,6 +78,41 @@ class words_base:
         #t_result = dict((x,y) for x,y in t_result)
         t_prob = sorted(t_prob.items(),key = lambda d:d[1],reverse=True)
 
+
+        return t_result,t_prob,t_datas
+
+    def get_pureproinfo(self,series_list,lo_s,lo_e):
+        """
+        get location prob
+        :param series_list:
+        :param lo_s:
+        :param lo_e:
+        :return:
+        """
+        t_result = {}
+        t_prob = {}
+        i = 0
+        t_len = 0
+        t_datas = []
+        for series in series_list:
+            if len(series) < lo_e:
+                continue
+            i = lo_s
+            t_key = series[lo_s:lo_e]
+
+            if t_key not in t_result:
+                t_result[t_key] = 1
+            else:
+                t_result[t_key] = t_result[t_key] + 1
+            t_len = t_len + 1
+            t_datas.append(series[lo_s:lo_e])
+        i = 0
+        for key in t_result:
+            t_prob[key] = t_result[key] / t_len
+        t_result = sorted(t_result.items(), key=lambda d: d[1], reverse=True)
+        #t_result = dict((x,y) for x,y in t_result)
+        t_prob = sorted(t_prob.items(),key = lambda d:d[1],reverse=True)
+
         return t_result,t_prob,t_datas
 
     def get_lengthinfo(self,series_list,lo_s,lo_e):
@@ -82,6 +125,20 @@ class words_base:
             t_datasone.append(int.from_bytes(t_temp,byteorder='little',signed=False))
             t_datastwo.append(int.from_bytes(t_temp,byteorder='big',signed=False))
         return t_datasone,t_datastwo,t_lengths
+
+    def get_seidinfo(self,series_list,lo_s,lo_e):
+        t_serienums = []
+        t_datasone = []
+        t_datastwo = []
+        i = 0
+        for series in series_list:
+            t_temp = series[lo_s:lo_e]
+            t_serienums.append(i)
+            t_datasone.append(int.from_bytes(t_temp,byteorder='little',signed=False))
+            t_datastwo.append(int.from_bytes(t_temp,byteorder='big',signed=False))
+            i = i + 1
+        return t_datasone,t_datastwo,t_serienums
+
 
 
 

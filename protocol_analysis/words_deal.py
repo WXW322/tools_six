@@ -29,6 +29,8 @@ class message_dealer:
                 self.const.append(i)
             i = i + 1
 
+
+
     def find_constone(self,lo_b,lo_e):
         #develop absolute or relative
         conster = words_basic.words_base()
@@ -73,15 +75,17 @@ class message_dealer:
     def huxinxi(self,vectorone,vectortwo):
         vectorthree = []
         for i in range(len(vectorone)):
-            vectorthree.append((vectorone[i],vectortwo[i]))
+            vectorthree.append(vectorone[i]+vectortwo[i])
         t_probone = self.caculate_prob(vectorone)
         t_probtwo = self.caculate_prob(vectortwo)
         t_probsum = self.caculate_prob(vectorthree)
         t_info = 0
         for key_one in t_probone:
             for key_two in t_probtwo:
-                t_info = t_info + t_probsum[(key_one,key_two)]*np.log(t_probsum(key_one,key_two)/(t_probone[key_one]*t_probtwo[key_two]))
-        return t_info
+                if key_one + key_two not in t_probsum:
+                    continue
+                t_info = t_info + t_probsum[key_one+key_two]*np.log(t_probsum[key_one + key_two]/(t_probone[key_one]*t_probtwo[key_two]))
+        return -t_info
 
 
 
@@ -125,6 +129,22 @@ class message_dealer:
             return 1
         else:
             return 0
+
+    def resplit(self):
+        print('111')
+
+    def ressemb(self,datas,lo):
+        t_puredata = []
+        for data in datas:
+            t_puredata.append(data.data)
+        t_listone = []
+        t_listtwo = []
+        for t_data in t_puredata:
+            if(len(t_data) > lo):
+                t_listone.append(t_data[lo-1:lo])
+                t_listtwo.append(t_data[lo:lo+1])
+        print (self.huxinxi(t_listone,t_listtwo))
+
 
 
 
@@ -249,12 +269,54 @@ class message_dealer:
                         print(key)
 
 
-"""
-MessageList = PCAPImporter.readFile('/home/wxw/data/modbus/test_new.pcap').values()
-dealer = message_dealer(MessageList)
-dealer.find_constone()
-print (dealer.const)
-"""
+    def findserienum(self,data,lo_s,lo_e):
+        t_lener = words_basic.words_base()
+        t_messages = []
+        for message in self.messages:
+            t_messages.append(message.data)
+        t_dataone, t_datatwo, t_series = t_lener.get_seidinfo(t_messages, lo_s, lo_e)
+        #print(t_dataone)
+        #print(t_datatwo)
+        #print(t_series)
+        j_one = self.pearson(t_dataone,t_series)
+        j_two = self.pearson(t_datatwo,t_series)
+        j_final = max(j_one,j_two)
+
+
+
+    def find_constfunc(self,lo_b,lo_e,L):
+        #develop absolute or relative
+        conster = words_basic.words_base()
+        t_messages = []
+        for message in self.messages:
+            t_messages.append(message.data)
+        t_r,t_l,_ = conster.get_logapinfo(t_messages,lo_b,lo_e)
+        t_lo = 1 - lo_b / L
+        t_num = 1 - len(t_r) / 255
+        t_en = 0
+        for t_pro in t_l:
+            t_en = t_en + t_pro[1] * np.log(t_pro[1])
+        t_en = -t_en
+        return t_lo * t_num * t_en
+
+    def find_head(self):
+        min_len = 10000
+        for message in self.messages:
+            t_len = len(message.data)
+            if t_len < min_len:
+                min_len = t_len
+        return min_len
+
+
+
+
+
+
+
+
+
+
+
 
 
 
