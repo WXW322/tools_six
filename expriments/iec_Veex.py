@@ -75,6 +75,8 @@ class exforresults:
 
         sys.stdout = standardout
 
+
+
     def test_iectotal(self,path):
         t_srcs,t_des = self.read_diredatas(path)
         t_srcsdata = []
@@ -172,6 +174,33 @@ class exforresults:
         ngram.get_rightscore(ngram.rightidoms,baseline,13)
         sys.stdout = standardout
 
+    def test_iecbaselineT(self,path):
+        t_srcs, t_des = self.read_diredatas(path)
+        t_srcsdata = []
+        t_desdata = []
+        for t_message in t_srcs:
+            t_srcsdata.append(t_message.data)
+        for t_message in t_des:
+            t_srcsdata.append(t_message.data)
+        ngram = ngramtree.ngramtree()
+        standardout = sys.stdout
+        file = open('/home/wxw/paper/researchresult/iec104/source/VE_baseT.txt', 'w+')
+        sys.stdout = file
+        print(len(t_srcsdata))
+        ngram.build_tree(t_srcsdata, 3)
+        ngram.caculate_prob()
+        ngram.print_htree()
+        ngram.get_conlos(t_srcsdata, 3)
+        print(ngram.conlosfre)
+        print(ngram.conlosentry)
+        ngram.get_sumlos()
+        ngram.baseline()
+        baseline = ngram.get_idoms(ngram.baselinelos)
+        print (baseline)
+        ngram.set_right([(0,1),(1,2),(2,4),(4,6),(6,7),(7,8),(8,9),(9,10),(10,12)])
+        ngram.get_rightscore(ngram.rightidoms,baseline,13)
+        sys.stdout = standardout
+
     def test_modbusbaseline(self,path,dire):
         t_srcs, t_des = self.read_diredatas(path)
         t_srcsdata = []
@@ -203,6 +232,37 @@ class exforresults:
         ngram.set_right([(0,2),(2,4),(4,6),(6,7),(7,8)])
         ngram.get_rightscore(ngram.rightidoms,baseline, 9)
         sys.stdout = standardout
+
+    def test_modbusbaseT(self,path):
+        t_srcs, t_des = self.read_diredatas(path)
+        t_srcsdata = []
+        for t_message in t_srcs:
+            t_srcsdata.append(t_message.data)
+        for t_message in t_des:
+            t_srcsdata.append(t_message.data)
+
+        ngram = ngramtree.ngramtree()
+        standardout = sys.stdout
+        file = open('/home/wxw/paper/researchresult/modbus/destination/VE_baseT.txt', 'w+')
+        sys.stdout = file
+        print(len(t_srcsdata))
+        ngram.build_tree(t_srcsdata, 3)
+        ngram.caculate_prob()
+        #print('aaa')
+        #ngram.print_htree()
+        ngram.print_htree()
+        ngram.get_conlos(t_srcsdata, 3)
+        print(ngram.conlosfre)
+        print(ngram.conlosentry)
+        ngram.get_sumlos()
+        ngram.baseline()
+        #print('bbb')
+        baseline = ngram.get_idoms(ngram.baselinelos)
+        print(baseline)
+        ngram.set_right([(0,2),(2,4),(4,6),(6,7),(7,8)])
+        ngram.get_rightscore(ngram.rightidoms,baseline, 9)
+        sys.stdout = standardout
+
 
     def test_modbus(self, path,dire):
         t_srcs, t_des = self.read_diredatas(path)
@@ -312,6 +372,33 @@ class exforresults:
         ngram.get_rightscore(baseline, ngram.rightidoms, 25)
         sys.stdout = standardout
 
+    def test_cipbaseT(self, path):
+        t_srcs, t_des = self.read_diredatas(path)
+        t_srcsdata = []
+        t_desdata = []
+        for t_message in t_srcs:
+            t_srcsdata.append(t_message.data)
+        for t_message in t_des:
+            t_srcsdata.append(t_message.data)
+        ngram = ngramtree.ngramtree()
+        standardout = sys.stdout
+        file = open('/home/wxw/paper/researchresult/cip/destination/VE_twobaseT.txt', 'w+')
+        sys.stdout = file
+        print(len(t_srcsdata))
+        ngram.build_tree(t_srcsdata, 3)
+        ngram.caculate_prob()
+        ngram.print_htree()
+        ngram.get_conlos(t_srcsdata, 3)
+        print(ngram.conlosfre)
+        print(ngram.conlosentry)
+        ngram.get_sumlos()
+        ngram.baseline()
+        baseline = ngram.get_idoms(ngram.baselinelos)
+        print(baseline)
+        ngram.set_right([(0, 2), (2, 4), (4, 8), (8, 12), (12, 20), (20, 24)])
+        ngram.get_rightscore(baseline, ngram.rightidoms, 25)
+        sys.stdout = standardout
+
     def test_cip(self,path,dire):
         t_srcs, t_des = self.read_diredatas(path)
         t_srcsdata = []
@@ -333,9 +420,13 @@ class exforresults:
         ngram.get_conlos(t_srcsdata, 3)
         print(ngram.conlosfre)
         print(ngram.conlosentry)
+
         t_fres, t_entrys = ngram.getlocationbyneibor(0.5 * len(t_srcsdata))
         print(t_fres)
-        ngram.get_idoms(t_fres)
+        t_sumlos = ngram.merge_splits()
+        print(t_sumlos)
+        # ngram.get_idoms(t_fres)
+        ngram.get_idoms(t_sumlos)
         ngram.set_right([(0, 2), (2, 4), (4, 8), (8, 12), (12, 20), (20, 24)])
         ngram.get_rightscore(ngram.rightidoms, ngram.idoms, 25)
         sys.stdout = standardout
@@ -350,7 +441,7 @@ class exforresults:
             t_srcsdata.append(t_message.data)
         ngram = ngramvec.ngramtree()
         standardout = sys.stdout
-        file = open('/home/wxw/paper/researchresult/cip/VE_newdatafinal.txt', 'w+')
+        file = open('/home/wxw/paper/researchresult/cip/VE_newdatafinalff.txt', 'w+')
         sys.stdout = file
         print(len(t_srcsdata))
         ngram.build_tree(t_srcsdata, 3)
@@ -360,8 +451,10 @@ class exforresults:
         print(ngram.conlosfre)
         print(ngram.conlosentry)
         t_fres, t_entrys = ngram.getlocationbyneibor(0.5 * len(t_srcsdata))
-        print(t_fres)
-        ngram.get_idoms(t_fres)
+        t_sumlos = ngram.merge_splits()
+        print(t_sumlos)
+        # ngram.get_idoms(t_fres)
+        ngram.get_idoms(t_sumlos)
         ngram.set_right([(0, 2), (2, 4), (4, 8), (8, 12), (12, 20), (20, 24)])
         ngram.get_rightscore(ngram.rightidoms, ngram.idoms, 25)
         sys.stdout = standardout
@@ -379,13 +472,15 @@ class exforresults:
 starttime = time.time()
 exp = exforresults()
 #exp.test_cipbaseline('/home/wxw/data/cip_test',1)
+#exp.test_modbusbaseT('/home/wxw/data/modbusdata')
+#exp.test_iecbaselineT('/home/wxw/data/iec104')
 #exp.test_iecbaseline('/home/wxw/data/iec104',1)
 #exp.test_modbusbaseline('/home/wxw/data/modbusdata')
 #exp.test_cip('/home/wxw/data/cip_datanew',0)
 #exp.find_sevenr('//home/wxw/data/iec104')
 #exp.test_modbus('/home/wxw/data/modbusdata',0)
 #exp.test_iec('/home/wxw/data/iec104',0)
-
+#exp.test_cipbaseT('/home/wxw/data/cip_datanew')
 #t_src,t_des = exp.read_diredatas('/home/wxw/data/iec104')
 #print(exp.get_loinfo(t_src + t_des,(6,7),'/home/wxw/paper/researchresult/iec104/lo_info/nonlength_info'))
 #exp.test_modbustotal('/home/wxw/data/modbusdata')

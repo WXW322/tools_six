@@ -14,6 +14,9 @@ class message_dealer:
         self.messages = None
         self.semessages = None
         self.condilo = None
+        self.rightlo = None
+        self.conborders = None
+        self.rborders = None
 
     def read_datas(self,dirs):
         paths = os.listdir(dirs)
@@ -29,6 +32,9 @@ class message_dealer:
 
     def set_conlo(self,los):
         self.condilo = los
+
+    def set_rlo(self,los):
+        self.rightlo = los
 
     def clus_sesionbydi(self,messages):
         src = self.get_ip(messages[0].source)
@@ -63,7 +69,7 @@ class message_dealer:
         t_messages = []
         for message in self.messages:
             t_messages.append(message.data)
-        t_r, t_l, _ = conster.pureproinfo(t_messages, lo_b, lo_e)
+        t_r, t_l, _ = conster.get_pureproinfo(t_messages, lo_b, lo_e)
         return int.from_bytes(t_l[0][0],byteorder='little',signed=False)
 
     def pearson(self, vector1, vector2):
@@ -293,8 +299,25 @@ class message_dealer:
             t_last = t_idom[1]
             t_middle = t_pre + 1
             if(t_idom[1] - t_idom[0] <= 2):
-                if(t_idom[1] - t_idom[0] == 2 and (((self.find_constone(t_idom[0],t_idom[0] + 1)) and ()) or (() and ()))):
-
+                if(t_idom[1] - t_idom[0] == 2):
+                    if(self.find_constone(t_idom[0],t_idom[0] + 1) and self.get_constone(t_idom[0],t_idom[0] + 1) != 0):
+                        t_pre = t_idom[0]
+                        t_middle = t_pre + 1
+                        t_last = t_idom[1]
+                        self.condilo.remove(t_idom)
+                        self.condilo.append((t_pre, t_middle))
+                        self.condilo.append((t_middle, t_last))
+                        self.condilo.sort(key=self.takefirst)
+                        t_len = t_len + 1
+                    elif(self.find_constone(t_idom[0] + 1,t_idom[1]) and self.get_constone(t_idom[0] + 1,t_idom[1]) != 0):
+                        t_pre = t_idom[0]
+                        t_middle = t_pre + 1
+                        t_last = t_idom[1]
+                        self.condilo.remove(t_idom)
+                        self.condilo.append((t_pre, t_middle))
+                        self.condilo.append((t_middle, t_last))
+                        self.condilo.sort(key=self.takefirst)
+                        t_len = t_len + 1
                 i = i + 1
                 continue
             elif(self.find_constone(t_idom[0],t_idom[1]) == 1):
@@ -346,6 +369,72 @@ class message_dealer:
                 t_words[t_idom] = 6
         return t_words
 
+    def idomtobor(self,borders):
+        t_borders = []
+        for t_idom in borders:
+            print(t_idom[0])
+            t_borders.append(t_idom[0])
+        t_borders.append(borders[-1][1])
+        return t_borders
+
+    def get_f1(self):
+        self.conborders = self.idomtobor(self.condilo)
+        self.rborders = self.idomtobor(self.rightlo)
+        t_H = self.rborders[-1]
+        conpbors = set(self.conborders)
+        rpborders = set(self.rborders)
+        T_boders = set([i for i in range(t_H + 1)])
+        rnborders = T_boders - rpborders
+        connbors = T_boders - conpbors
+        tpborders = rpborders&conpbors
+        fnborders = rpborders&connbors
+        fpborders = rnborders&conpbors
+        tnborders = rnborders&connbors
+        acc = (len(tpborders) + len(tnborders))/(len(tpborders) + len(tnborders) + len(fnborders) + len(fnborders))
+        pre = len(tpborders)/(len(tpborders) + len(fpborders))
+        recall = (len(tpborders)/(len(tpborders) + len(fnborders)))
+        f1 = 2*pre*recall/(pre + recall)
+        print("conb:",self.conborders)
+        print("rb:",self.rborders)
+        print("To;",T_boders)
+        print("tp:",tpborders)
+        print("fn:",tnborders)
+        print("fp:",fpborders)
+        print("tn:",tnborders)
+        print("pre:",pre)
+        print("recall:",recall)
+        print("f1:",f1)
+
+
+    def clus_byfun(self):
+        print('111')
+
+
+
+
+
+
+def t_fone(s_file,r_outfile,t_s,t_r):
+    Me = message_dealer()
+    Me.read_datas(s_file)
+    standardout = sys.stdout
+    file = open(r_outfile, 'w+')
+    sys.stdout = file
+    Me.set_conlo(t_s)
+    Me.set_rlo(t_r)
+    Me.resplit()
+    Me.reclus()
+    Me.get_f1()
+
+def t_two(s_file,r_outfile,t_s,t_r):
+    Me = message_dealer()
+    Me.read_datas(s_file)
+    standardout = sys.stdout
+    file = open(r_outfile, 'w+')
+    sys.stdout = file
+    Me.set_conlo(t_s)
+    Me.set_rlo(t_r)
+    Me.get_f1()
 
 
 
@@ -355,26 +444,37 @@ class message_dealer:
 
 
 
-
-
-
+#t_fone('/home/wxw/data/modbusdata','/home/wxw/paper/researchresult/modbus/borders/ours/out',[(0, 2), (2, 5), (5, 7), (7, 8)],[(0,2),(2,4),(4,6),(6,7),(7,8)])
+#t_two('/home/wxw/data/modbusdata','/home/wxw/paper/researchresult/modbus/borders/base/out',[(0, 2), (2, 5), (5, 9)],[(0,2),(2,4),(4,6),(6,7),(7,8)])
+#t_two('/home/wxw/data/iec104','/home/wxw/paper/researchresult/iec104/borders/base/out',[(0, 2), (2, 5), (5, 9), (9, 11), (11, 17)],[(0,1),(1,2),(2,4),(4,6),(6,7),(7,8),(8,9),(9,10),(10,12)])
+t_fone('/home/wxw/data/iec104','/home/wxw/paper/researchresult/iec104/borders/ours/out',[(0, 1),(1, 2),(2, 4), (4, 6),(6, 7),(7, 9), (9, 11), (11, 12)],[(0,1),(1,2),(2,4),(4,6),(6,7),(7,8),(8,9),(9,10),(10,12)])
+#t_two('/home/wxw/data/cip_datanew','/home/wxw/paper/researchresult/cip/borders/base/out',[(0, 2), (2, 4), (4, 6), (6, 9), (9, 13), (13, 17), (17, 20), (20, 22)],[(0, 2), (2, 4), (4, 8), (8, 12), (12, 20), (20, 24)])
+#t_fone('/home/wxw/data/cip_datanew','/home/wxw/paper/researchresult/cip/borders/ours/out',[(0, 2), (2, 3), (3, 4), (4, 6), (6, 7), (7, 10), (10, 11), (11, 12), (12, 15), (15, 16), (16, 17), (17, 18), (18, 20), (20, 23)],[(0, 2), (2, 4), (4, 8), (8, 12), (12, 20), (20, 24)])
+"""
 
 Me = message_dealer()
-#Me.read_datas('/home/wxw/data/cip_datanew')
-#Me.read_datas('/home/wxw/data/iec104')
-Me.read_datas('/home/wxw/data/modbusdata')
-standardout = sys.stdout
-#file = open('/home/wxw/paper/researchresult/cip/reassemb/out','w+')
-#file = open('/home/wxw/paper/researchresult/iec104/words/out','w+')
-file = open('/home/wxw/paper/researchresult/modbus/words/out','w+')
-sys.stdout = file
 
+Me.read_datas('/home/wxw/data/cip_datanew')
+#Me.read_datas('/home/wxw/data/iec104')
+#Me.read_datas('/home/wxw/data/modbusdata')
+standardout = sys.stdout
+file = open('/home/wxw/paper/researchresult/cip/borders/out','w+')
+#file = open('/home/wxw/paper/researchresult/iec104/words/out','w+')
+#file = open('/home/wxw/paper/researchresult/modbus/words_de/out','w+')
+sys.stdout = file
+#print(Me.get_constone(2,3))
+#print(Me.get_constone(6,7))
 #t_se = [(0, 2), (2, 3), (3, 4), (4, 6), (6, 7), (7, 10), (10, 11), (11, 12), (12, 15), (15, 16), (16, 18), (18, 20), (20, 23)]
 #t_se = [(0, 2), (2, 5), (5, 7), (7, 8), (8, 9), (9, 11)]
-t_se = [(0, 2), (2, 5), (5, 7), (7, 8), (8, 9), (9, 11), (11, 12),(12, 14)]
+
+#t_se = [(0, 2), (2, 5), (5, 7), (7, 8), (8, 9), (9, 11), (11, 12),(12, 14)]
+t_se = [(0, 2), (2, 3), (3, 4), (4, 6), (6, 7), (7, 10), (10, 11), (11, 12), (12, 15), (15, 16), (16, 18), (18, 20), (20, 23)]
+
 Me.set_conlo(t_se)
 Me.resplit()
 Me.reclus()
-print(Me.extract_words(t_se,14))
+Me.idomtobor()
+#print(Me.extract_words(t_se,23))
 
 sys.stdout = standardout
+"""
