@@ -30,6 +30,7 @@ def get_tcount(clus,lo):
     t_s = lo[0]
     t_e = lo[1]
     t_n = {}
+    #print_clus(clus,'fun')
     for clu in clus:
         if(len(clu) < t_e + 1):
             t_id = clu[2]
@@ -80,6 +81,8 @@ def sample_data(messages,T):
             t_sum = t_sum + len(messages[key])
             t_ps[key] = 0
     left_c = t_count - len(t_ps)
+    if left_c == 0:
+        return t_f
     left_l = T - t_sum
     left_avn = left_l / left_c
     for key in messages:
@@ -109,11 +112,12 @@ def get_keyclus(clus,key,r_lo):
                     break
         else:
             for idom in clu:
-                if(len(idom) > r_lo[1] + 1 and idom[r_lo[0]:idom[r_lo[1]]] == key):
+                if(len(idom) > r_lo[1] + 1 and idom[r_lo[0]:r_lo[1]] == key):
                     t_lo = 1
                     break
         if(t_lo == 1):
             t_c = t_c + 1
+    #print(key,t_c)
     return t_c
 
 def get_precess(clus,r_lo,keys):
@@ -132,8 +136,8 @@ def get_precess(clus,r_lo,keys):
             t_cu = get_keyclus(clus,key,r_lo)
         if t_cu == 1:
             t_pre = t_pre + 1
-    print(t_r,t_pre,t_r/len(clus),t_pre/len(keys))
-    return(t_r,t_pre,t_r/len(clus),t_cu/len(keys))
+    print(t_r,t_pre,t_r/len(clus),t_pre/len(keys),(t_r/len(clus)) * (t_pre/len(keys)))
+    return(t_r,t_pre,t_r/len(clus),t_cu/len(keys),(t_r/len(clus)) * (t_pre/len(keys)))
 
 def print_binary(datas):
     for data in datas:
@@ -150,6 +154,22 @@ def print_clus(datas,args):
     print(args + 'end:')
     print()
 
+def get_lengths(datas):
+    t_sum = 0
+    for data in datas:
+        print (len(data))
+        t_sum = t_sum + len(data)
+    print(t_sum/len(datas))
+
+def short_messages(datas,T):
+    i = 0
+    while(i < len(datas)):
+        if(len(datas[i]) > T):
+            datas[i] = datas[i][0:T]
+        i = i + 1
+    return datas
+
+
 def get_results(s_path,des_path,los,para):
     t_output = sys.stdout
     file = open(des_path,'w+')
@@ -162,7 +182,10 @@ def get_results(s_path,des_path,los,para):
     #print('split_end')
 
     t_fdatas = sample_data(t_funclus,2000)
+    #t_fdatas = short_messages(t_fdatas,100)
+    #get_lengths(t_fdatas)
     #print_clus(t_fdatas,'sample')
+    #sys.exit()
     t_clus = clus_bynw(t_fdatas,para)
     t_fmes = []
     for t_clu in t_clus:
@@ -173,11 +196,53 @@ def get_results(s_path,des_path,los,para):
         t_fmes.append(t_M)
 
         #print_clus(t_M,'nw')
-
-
+    #print('start')
     get_precess(t_fmes,los,t_funclus.keys())
+    #print('end')
+
+    #t_tmes = clus_byfun(t_fdatas,los)
+    #get_precess(t_tmes,los,t_funclus.keys())
 
 
+
+def get_funcr(s_path,des_path,los,para):
+    t_output = sys.stdout
+    file = open(des_path,'w+')
+    sys.stdout = file
+    datas = read_data(s_path)
+    t_funclus = split_byfc(datas,los)
+    #print('split_start')
+    #for t_key in t_funclus:
+    #    print_clus(t_funclus[t_key],'p')
+    #print('split_end')
+
+    t_fdatas = sample_data(t_funclus,100)
+    #t_fdatas = short_messages(t_fdatas,100)
+    #get_lengths(t_fdatas)
+    #print_clus(t_fdatas,'sample')
+    #sys.exit()
+    #t_clus = clus_bynw(t_fdatas,para)
+    t_fmes = []
+    t_tmes = clus_byfun(t_fdatas,los)
+    get_precess(t_tmes,los,t_funclus.keys())
+
+
+def clus_byfun(t_fdatas,lo):
+    t_final = {}
+    for data in t_fdatas:
+        if len(data) < lo[1]:
+            if "xx" not in t_final:
+                t_final["xx"] = []
+            t_final["xx"].append(data)
+        t_idom = data[lo[0]:lo[1]]
+        if t_idom not in t_final:
+            t_final[t_idom] = []
+        t_final[t_idom].append(data)
+    t_ff = []
+    for key in t_final:
+        t_ff.append(t_final[key])
+    return t_ff
+    
 
 
 
@@ -189,10 +254,16 @@ def get_results(s_path,des_path,los,para):
 
 
 starttime = time.time()
+value = sys.argv[1]
 #data = read_data('/home/wxw/data/modbustest')
 #clus_bynw(data)
 #for i in [80,70,60,50,40,30,20,10]:
-#    get_results('/home/wxw/data/modbustest','/home/wxw/paper/researchresult/classify/modbus/netzob/out'+str(i),(7,8),i)
-get_results('/home/wxw/data/iec104','/home/wxw/paper/researchresult/classify/iec104/netzob/out_t'+str(40),(6,7),40)
+#get_results('/home/wxw/data/modbustest','/home/wxw/paper/researchresult/classify/modbus/netzob/out'+str(value),(7,8),int(value))
+#get_results('/home/wxw/data/cip_datanew','/home/wxw/paper/researchresult/classify/cip/netzob_new/out'+str(value),(0,2),int(value))
+get_results('/home/wxw/data/iec104','/home/wxw/paper/researchresult/classify/iec104/netzob_new/'+str(value),(6,7),int(value))
+#get_funcr('/home/wxw/data/modbustest','/home/wxw/paper/researchresult/classify/modbus/ours/out'+str(value),(7,8),int(value))
+#get_funcr('/home/wxw/data/iec104','/home/wxw/paper/researchresult/classify/iec104/ours/'+str(value),(6,7),50)
+#get_funcr('/home/wxw/data/cip_datanew','/home/wxw/paper/researchresult/classify/cip/ours/out'+str(value),(0,2),int(value))
+
 endtime = time.time()
-print("time is:",endtime - starttime)
+print(endtime - starttime)
