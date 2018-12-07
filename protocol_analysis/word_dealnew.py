@@ -28,6 +28,7 @@ class message_dealer:
             t_datas.extend(t_data)
             t_sedatas.append((t_data,path))
         self.messages = t_datas
+        print(len(self.messages))
         self.semessages = t_sedatas
 
     def set_conlo(self,los):
@@ -274,7 +275,7 @@ class message_dealer:
         #location_f = words_deal.message_dealer(datas)
         standardout = sys.stdout
         #file = open(info_dir, 'w+')
-        #sys.stdout = file
+        sys.stdout = file
         if (self.find_constone(l_s,l_e) == 1):
             return 1
         elif(self.find_lenbyaccu(l_s,l_e) == 1):
@@ -353,8 +354,6 @@ class message_dealer:
             i = i + 1
 
     def extract_words(self,t_idoms,head):
-        print(head)
-        print(t_idoms)
         for t_idom in t_idoms:
             if t_idom[1] > head:
                 t_idoms.remove(t_idom)
@@ -372,7 +371,6 @@ class message_dealer:
         for t_idom in t_idoms:
             if t_idom not in t_words:
                 t_words[t_idom] = 6
-        print(t_words)
         return t_words
 
     def idomtobor(self,borders):
@@ -410,7 +408,6 @@ class message_dealer:
         print("pre:",pre)
         print("recall:",recall)
         print("f1:",f1)
-        return f1
 
 
     def clus_byfun(self):
@@ -421,28 +418,17 @@ class message_dealer:
 
 
 
-def t_fone(s_file,r_outdir,t_s,t_r):
+def t_fone(s_file,r_outfile,t_s,t_r):
     Me = message_dealer()
     Me.read_datas(s_file)
     standardout = sys.stdout
-    outpath = r_outdir
-    # outpath = os.path.join(r_outdir,'mout')
-    #fileone = open(outpath, 'w+')
-    #sys.stdout = fileone
+    file = open(r_outfile, 'w+')
+    sys.stdout = file
     Me.set_conlo(t_s)
     Me.set_rlo(t_r)
     Me.resplit()
     Me.reclus()
-    #Me.get_f1()
-    t_head = Me.find_head()
-    t_fhead = min(23,t_head + 2)
-    words_path = os.path.join(r_outdir,'wordsf_out')
-    t_w = open(words_path,'w+')
-    sys.stdout = t_w
-    t_idoms = Me.condilo
-    t_results = Me.extract_words(t_idoms,t_fhead)
-    t_results = sorted(t_results.items(),key = lambda x:x[0][0])
-    print(t_results)
+    Me.get_f1()
     
 
 
@@ -450,22 +436,15 @@ def t_two(s_file,r_outdir,t_s,t_r):
     Me = message_dealer()
     Me.read_datas(s_file)
     standardout = sys.stdout
-    #outpath = os.path.join(r_outdir,'mout')
-    outpath = r_outdir
+    outpath = os.path.join(r_outdir,'mout')
     fileone = open(outpath, 'w+')
     sys.stdout = fileone
     Me.set_conlo(t_s)
     Me.set_rlo(t_r)
     Me.get_f1()
-    #t_head = Me.find_head()
-    #t_fhead = min(23,t_head + 2)
-    #t_fhead = t_head + 2
-    #print(t_fhead)
-    #words_path = os.path.join(r_outdir,'words_outnew')
-    #t_w = open(words_path,'w+')
-    #sys.stdout = t_w
-
-
+    t_head = Me.find_head()
+    t_fhead = min(23,t_head + 2)
+    #words_path = 
 
 def get_words(file_to,data_file,borders):
     temp_out = sys.stdout
@@ -490,19 +469,19 @@ def get_words(file_to,data_file,borders):
 
 
 
+Me = message_dealer()
+
+Me.read_datas('/home/wxw/data/cip_datanew')
+Me.read_datas('/home/wxw/data/iec104')
+Me.read_datas('/home/wxw/data/modbusdata')
 
 
-t_fone('/home/wxw/data/modbusdata','/home/wxw/paper/researchresult/words_find/modbus/',[(0, 2), (2, 3), (3, 5), (5, 7), (7, 8), (8, 9), (9, 11), (11, 12), (12, 14), (14, 16), (16, 17), (17, 19), (19, 20)],[(0,2),(2,4),(4,6),(6,7),(7,8)])
-#t_fone('/home/wxw/data/modbusdata','/home/wxw/paper/researchresult/words_find/modbus',[(0, 2), (2, 4), (4, 5), (5, 6), (6, 7), (7, 8), (8, 9), (9, 10), (10, 11), (11, 12), (12, 14), (14, 16), (16, 17), (17, 18), (18, 19)],[(0,2),(2,4),(4,6),(6,7),(7,8)])
-#t_two('/home/wxw/data/modbusdata','/home/wxw/paper/researchresult/modbus/borders/base/fourhout',[(0, 2), (2, 5), (5, 9), (9, 11)],[(0,2),(2,4),(4,6),(6,7),(7,8)])
-#t_two('/home/wxw/data/iec104','/home/wxw/paper/researchresult/iec104/borders/base/fourhout',[(0,3),(3,7),(7,10),(10,12),(12,15),(15,20),(20,23),(23,28)],[(0,1),(1,2),(2,4),(4,6),(6,7),(7,8),(8,9),(9,10),(10,12)])
-t_fone('/home/wxw/data/iec104','/home/wxw/paper/researchresult/words_find/iec104/',[(0, 1), (1, 2), (2, 3), (3, 4), (4, 6), (6, 7), (7, 8), (8, 10), (10, 12),     (12, 13), (13, 15), (15, 16), (16, 18), (18, 20)],[(0,1),(1,2),(2,4),(4,6),(6,7),(7,8),(8,9),(9,10),(10,12)])
-#t_two('/home/wxw/data/cip_datanew','/home/wxw/paper/researchresult/cip/borders/base/fourhout',[(0, 2), (2, 4), (4, 6), (6, 10), (10, 13), (13, 17), (17, 23), (23, 28)       , (28, 30), (30, 32), (32, 36), (36, 38), (38, 40), (40, 42)],[(0, 2), (2, 4), (4, 8), (8, 12), (12, 20), (20, 24)])
-#t_fone('/home/wxw/data/cip_datanew','/home/wxw/paper/researchresult/cip/borders/ours/fourout',[(0, 2), (2, 4), (4, 6), (6, 10), (10, 13), (13, 17), (17, 23), (23, 28) , (28, 30), (30, 32), (32, 36), (36, 38), (38, 40)],[(0, 2), (2, 4), (4, 8), (8, 12), (12, 20), (20, 24)])
-
-#t_fone('/home/wxw/data/iec104','/home/wxw/paper/researchresult/words_find/iec104',[(0, 1),(1, 2),(2, 4), (4, 6),(6, 7),(7, 9), (9, 11), (11, 12)],[(0,1),(1,2),(2,4),(4,6),(6,7),(7,8),(8,9),(9,10),(10,12)])
-
-#t_fone('/home/wxw/data/cip_datanew','/home/wxw/paper/researchresult/words_find/cip',[(0, 2), (2, 3), (3, 4), (4, 6), (6, 7), (7, 10), (10, 11), (11, 12), (12, 15), (15, 16), (16, 17), (17, 18), (18, 20), (20, 23)],[(0, 2), (2, 4), (4, 8), (8, 12), (12, 20), (20, 23),(23, 30),(30, 33),(33, 34),(34, 35)])
+#t_fone('/home/wxw/data/modbusdata','/home/wxw/paper/researchresult/modbus/borders/ours/out',[(0, 2), (2, 5), (5, 7), (7, 8)],[(0,2),(2,4),(4,6),(6,7),(7,8)])
+#t_two('/home/wxw/data/modbusdata','/home/wxw/paper/researchresult/modbus/borders/base/out',[(0, 2), (2, 5), (5, 9)],[(0,2),(2,4),(4,6),(6,7),(7,8)])
+#t_two('/home/wxw/data/iec104','/home/wxw/paper/researchresult/iec104/borders/base/out',[(0, 2), (2, 5), (5, 9), (9, 11), (11, 17)],[(0,1),(1,2),(2,4),(4,6),(6,7),(7,8),(8,9),(9,10),(10,12)])
+#t_fone('/home/wxw/data/iec104','/home/wxw/paper/researchresult/iec104/borders/ours/out',[(0, 1),(1, 2),(2, 4), (4, 6),(6, 7),(7, 9), (9, 11), (11, 12)],[(0,1),(1,2),(2,4),(4,6),(6,7),(7,8),(8,9),(9,10),(10,12)])
+#t_two('/home/wxw/data/cip_datanew','/home/wxw/paper/researchresult/cip/borders/base/out',[(0, 2), (2, 4), (4, 6), (6, 9), (9, 13), (13, 17), (17, 20), (20, 22)],[(0, 2), (2, 4), (4, 8), (8, 12), (12, 20), (20, 24)])
+#t_fone('/home/wxw/data/cip_datanew','/home/wxw/paper/researchresult/cip/borders/ours/out',[(0, 2), (2, 3), (3, 4), (4, 6), (6, 7), (7, 10), (10, 11), (11, 12), (12, 15), (15, 16), (16, 17), (17, 18), (18, 20), (20, 23)],[(0, 2), (2, 4), (4, 8), (8, 12), (12, 20), (20, 24)])
 """
 
 Me = message_dealer()

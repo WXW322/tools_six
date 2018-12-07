@@ -2,7 +2,7 @@
 from netzob.all import *
 import sys
 sys.path.append("../../")
-import t_node
+#import t_node
 import numpy as np
 import random
 import math

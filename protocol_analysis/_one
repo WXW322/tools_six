@@ -427,22 +427,21 @@ def t_fone(s_file,r_outdir,t_s,t_r):
     standardout = sys.stdout
     outpath = r_outdir
     # outpath = os.path.join(r_outdir,'mout')
-    #fileone = open(outpath, 'w+')
-    #sys.stdout = fileone
+    fileone = open(outpath, 'w+')
+    sys.stdout = fileone
     Me.set_conlo(t_s)
     Me.set_rlo(t_r)
     Me.resplit()
     Me.reclus()
-    #Me.get_f1()
+    Me.get_f1()
+    return 1
     t_head = Me.find_head()
     t_fhead = min(23,t_head + 2)
-    words_path = os.path.join(r_outdir,'wordsf_out')
+    words_path = os.path.join(r_outdir,'words_out')
     t_w = open(words_path,'w+')
     sys.stdout = t_w
     t_idoms = Me.condilo
-    t_results = Me.extract_words(t_idoms,t_fhead)
-    t_results = sorted(t_results.items(),key = lambda x:x[0][0])
-    print(t_results)
+    print(Me.extract_words(t_idoms,t_fhead))
     
 
 
@@ -492,13 +491,13 @@ def get_words(file_to,data_file,borders):
 
 
 
-t_fone('/home/wxw/data/modbusdata','/home/wxw/paper/researchresult/words_find/modbus/',[(0, 2), (2, 3), (3, 5), (5, 7), (7, 8), (8, 9), (9, 11), (11, 12), (12, 14), (14, 16), (16, 17), (17, 19), (19, 20)],[(0,2),(2,4),(4,6),(6,7),(7,8)])
+#t_fone('/home/wxw/data/modbusdata','/home/wxw/paper/researchresult/modbus/borders/ours/fourout',[(0, 2), (2, 3), (3, 5), (5, 7), (7, 8), (8, 9), (9, 11), (11, 12), (12, 14    ), (14, 16), (16, 17), (17, 19), (19, 20)],[(0,2),(2,4),(4,6),(6,7),(7,8)])
 #t_fone('/home/wxw/data/modbusdata','/home/wxw/paper/researchresult/words_find/modbus',[(0, 2), (2, 4), (4, 5), (5, 6), (6, 7), (7, 8), (8, 9), (9, 10), (10, 11), (11, 12), (12, 14), (14, 16), (16, 17), (17, 18), (18, 19)],[(0,2),(2,4),(4,6),(6,7),(7,8)])
 #t_two('/home/wxw/data/modbusdata','/home/wxw/paper/researchresult/modbus/borders/base/fourhout',[(0, 2), (2, 5), (5, 9), (9, 11)],[(0,2),(2,4),(4,6),(6,7),(7,8)])
 #t_two('/home/wxw/data/iec104','/home/wxw/paper/researchresult/iec104/borders/base/fourhout',[(0,3),(3,7),(7,10),(10,12),(12,15),(15,20),(20,23),(23,28)],[(0,1),(1,2),(2,4),(4,6),(6,7),(7,8),(8,9),(9,10),(10,12)])
-t_fone('/home/wxw/data/iec104','/home/wxw/paper/researchresult/words_find/iec104/',[(0, 1), (1, 2), (2, 3), (3, 4), (4, 6), (6, 7), (7, 8), (8, 10), (10, 12),     (12, 13), (13, 15), (15, 16), (16, 18), (18, 20)],[(0,1),(1,2),(2,4),(4,6),(6,7),(7,8),(8,9),(9,10),(10,12)])
+#t_fone('/home/wxw/data/iec104','/home/wxw/paper/researchresult/iec104/borders/ours/fourout',[(0, 1), (1, 2), (2, 3), (3, 4), (4, 6), (6, 7), (7, 8), (8, 10), (10, 12),     (12, 13), (13, 15), (15, 16), (16, 18), (18, 20)],[(0,1),(1,2),(2,4),(4,6),(6,7),(7,8),(8,9),(9,10),(10,12)])
 #t_two('/home/wxw/data/cip_datanew','/home/wxw/paper/researchresult/cip/borders/base/fourhout',[(0, 2), (2, 4), (4, 6), (6, 10), (10, 13), (13, 17), (17, 23), (23, 28)       , (28, 30), (30, 32), (32, 36), (36, 38), (38, 40), (40, 42)],[(0, 2), (2, 4), (4, 8), (8, 12), (12, 20), (20, 24)])
-#t_fone('/home/wxw/data/cip_datanew','/home/wxw/paper/researchresult/cip/borders/ours/fourout',[(0, 2), (2, 4), (4, 6), (6, 10), (10, 13), (13, 17), (17, 23), (23, 28) , (28, 30), (30, 32), (32, 36), (36, 38), (38, 40)],[(0, 2), (2, 4), (4, 8), (8, 12), (12, 20), (20, 24)])
+#t_fone('/home/wxw/data/cip_datanew','/home/wxw/paper/researchresult/cip/borders/ours/twoout',[(0, 2), (2, 3), (3, 4), (4, 6), (6, 7), (7, 11), (11, 12), (12, 15), (15, 16), (16, 17), (17, 18), (18, 20), (20, 24)],[(0, 2), (2, 4), (4, 8), (8, 12), (12, 20), (20, 24)])
 
 #t_fone('/home/wxw/data/iec104','/home/wxw/paper/researchresult/words_find/iec104',[(0, 1),(1, 2),(2, 4), (4, 6),(6, 7),(7, 9), (9, 11), (11, 12)],[(0,1),(1,2),(2,4),(4,6),(6,7),(7,8),(8,9),(9,10),(10,12)])
 

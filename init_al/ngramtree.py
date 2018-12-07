@@ -45,6 +45,7 @@ class ngramtree:
         t_is = 0
         for child in self.tree.children(p_name):
             if (int(self.tract(child.identifier)[1]) == n_num):
+            #if (self.tract(child.identifier)[1] == n_num):
                 name = child.identifier
                 t_is = 1
                 child.data[0] = child.data[0] + 1
@@ -95,7 +96,7 @@ class ngramtree:
         t_h = 1
         while (t_h <= t_H):
             t_nodes = self.get_h(t_h)
-            # print(t_h)
+            print(t_h)
             for t_node in t_nodes:
                 t_node = self.tree.get_node(t_node)
                 self.print_node(t_node.identifier)
@@ -324,6 +325,7 @@ class ngramtree:
 
         self.conlosfre = t_fref
         self.conlosentry = t_entryf
+        return t_fref,t_entryf
 
     def get_sumlos(self):
         """
@@ -438,6 +440,57 @@ class ngramtree:
         t_idoms.append((t_los[i - 1],-1))
         #self.idoms = t_idoms
         return t_idoms
+
+    def getkeywords(self,sentence,L):
+        """
+        get final vote result,in:sentence out:locations
+        """
+        t_fres,t_entrys = self.get_conlos(sentence,L)
+        t_finals = {}
+        for key in t_fres:
+            t_finals[key] = t_fres[key]
+        for key in t_entrys:
+            if key not in t_finals:
+                t_finals[key] = t_entrys[key]
+            else:
+                t_finals[key] = t_finals[key] + t_entrys[key]
+        i = 1
+        print(t_finals)
+        t_flos = []
+        t_flos.append(0)
+        sentence = sentence[0]
+        while(i < len(sentence) - 1):
+            prekey = i - 1
+            lastkey = i + 1
+            prenum = 0
+            lastnum = 0
+            nownum = 0
+            if prekey in t_finals:
+                prenum = t_finals[prekey]
+            if lastkey in t_finals:
+                lastnum = t_finals[lastkey]
+            if i in t_finals:
+                nownum = t_finals[i]
+            if(nownum > prenum and nownum > lastnum):
+                t_flos.append(i)
+            i = i + 1
+        print(t_flos)
+        #get keywords in:locations out:keywords
+        i = 1
+        t_fkeys = []
+        while(i < len(t_flos)):
+            t_fkeys.append(sentence[t_flos[i - 1]:t_flos[i]])
+            i = i + 1
+        t_fkeys.append(sentence[t_flos[i - 1]:-1])
+        print(t_fkeys)
+        return t_fkeys
+
+        
+         
+
+                
+
+
 
     def get_rightscore(self,t_r,t_c,score_l):
         """

@@ -204,6 +204,34 @@ def get_results(s_path,des_path,los,para):
     #get_precess(t_tmes,los,t_funclus.keys())
 
 
+def get_basespes(s_path,des_path,los,para,lo):
+    t_output = sys.stdout
+    file = open(des_path,'w+')
+    sys.stdout = file
+    datas = read_data(s_path)
+    t_funclus = split_byfc(datas,los)
+    #print('split_start')
+    #for t_key in t_funclus:
+    #    print_clus(t_funclus[t_key],'p')
+    #print('split_end')
+
+    t_fdatas = sample_data(t_funclus,2000)
+    if lo == 1:
+        t_fdatas = short_messages(t_fdatas,100)
+    #get_lengths(t_fdatas)
+    #print_clus(t_fdatas,'sample')
+    #sys.exit()
+    t_clus = clus_bynw(t_fdatas,para)
+    t_fmes = []
+    print(len(t_funclus.keys()))
+    for t_clu in t_clus:
+        print(t_clu._str_debug())
+        #print(t_clu.getCells())
+        print("")
+
+        #print_clus(t_M,'nw')
+    #print('start')
+    #get_precess(t_fmes,los,t_funclus.keys())
 
 def get_funcr(s_path,des_path,los,para):
     t_output = sys.stdout
@@ -225,6 +253,34 @@ def get_funcr(s_path,des_path,los,para):
     t_fmes = []
     t_tmes = clus_byfun(t_fdatas,los)
     get_precess(t_tmes,los,t_funclus.keys())
+
+def getourspe(s_path,des_path,los,para):
+    t_output = sys.stdout
+    file = open(des_path,'w+')
+    sys.stdout = file
+    datas = read_data(s_path)
+    t_funclus = split_byfc(datas,los)
+    #print('split_start')
+    #for t_key in t_funclus:
+    #    print_clus(t_funclus[t_key],'p')
+    #print('split_end')
+
+    t_fdatas = sample_data(t_funclus,100)
+    t_fmes = []
+    t_tmes = clus_byfun(t_fdatas,los)
+    print(t_funclus.keys())
+    for datas in t_tmes:
+        pre_messages = []
+        for data in datas:
+            t_data = RawMessage(data)
+            pre_messages.append(t_data)
+        t_sympol = Symbol(messages = pre_messages)
+        f_clus = Format()
+        f_clus.splitAligned(t_sympol, doInternalSlick=True)
+        print(t_sympol._str_debug())
+        print(t_sympol.getCells()[0:2])
+        print("")
+
 
 
 def clus_byfun(t_fdatas,lo):
@@ -255,12 +311,19 @@ def clus_byfun(t_fdatas,lo):
 
 starttime = time.time()
 value = sys.argv[1]
+file_from = sys.argv[2]
+file_to = sys.argv[3]
+lo = sys.argv[4]
+start = sys.argv[5]
+end = sys.argv[6]
 #data = read_data('/home/wxw/data/modbustest')
 #clus_bynw(data)
 #for i in [80,70,60,50,40,30,20,10]:
 #get_results('/home/wxw/data/modbustest','/home/wxw/paper/researchresult/classify/modbus/netzob/out'+str(value),(7,8),int(value))
+#get_basespes(file_from,file_to,(int(start),int(end)),int(value),int(lo))
+getourspe(file_from,file_to,(int(start),int(end)),int(value))
 #get_results('/home/wxw/data/cip_datanew','/home/wxw/paper/researchresult/classify/cip/netzob_new/out'+str(value),(0,2),int(value))
-get_results('/home/wxw/data/iec104','/home/wxw/paper/researchresult/classify/iec104/netzob_new/'+str(value),(6,7),int(value))
+#get_results('/home/wxw/data/iec104','/home/wxw/paper/researchresult/classify/iec104/netzob_new/'+str(value),(6,7),int(value))
 #get_funcr('/home/wxw/data/modbustest','/home/wxw/paper/researchresult/classify/modbus/ours/out'+str(value),(7,8),int(value))
 #get_funcr('/home/wxw/data/iec104','/home/wxw/paper/researchresult/classify/iec104/ours/'+str(value),(6,7),50)
 #get_funcr('/home/wxw/data/cip_datanew','/home/wxw/paper/researchresult/classify/cip/ours/out'+str(value),(0,2),int(value))
