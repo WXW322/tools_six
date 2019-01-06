@@ -16,8 +16,17 @@ class voters:
         self.words_fre = None
         self.words_table = None
         self.words_entry = None
+        self.glvotes = None
+        self.svotes = None
 
+    def query_key(self,key):
+        return self.words_table[key],self.words_fre[key],self.words_entry[key]
 
+    def query_keys(self,keys):
+        f_r = {}
+        for key in keys:
+            f_r[key] = self.query_key(key)
+        return f_r
     def get_single_messages(self,message):
         """
         converse a message to n-gram item
@@ -100,19 +109,19 @@ class voters:
         t_biaozhun = {}
         t_mean = {}
         t_std = {}
-        for i in range(1,nrange):
+        for i in range(1,nrange + 1):
             t_fredic[i] = []
             t_biaozhun[i] = []
         for key in t_dics:
             t_fredic[len(key.split(' '))].append(t_dics[key])
 
-        for i in range(1,nrange):
+        for i in range(1,nrange + 1):
             t_fredic[i] = sum(t_fredic[i])
         t_frer = {}
         for key in t_dics:
             t_frer[key] = -np.log(t_dics[key] / t_fredic[len(key.split(' '))])
             t_biaozhun[len(key.split(' '))].append(t_frer[key])
-        for i in range(1,nrange):
+        for i in range(1,nrange + 1):
             t_mean[i] = np.mean(np.array(t_biaozhun[i]))
             t_std[i] = np.std(np.array(t_biaozhun[i]),ddof = 1)
         for key in t_dics:
@@ -150,18 +159,18 @@ class voters:
         """
         t_entrys = {}
         for key in t_dics:
-            if(len(key.split(' ')) < nrange):
+            if(len(key.split(' ')) < nrange + 1):
                 t_entrys[key] = self.get_childs(t_dics,key)
             else:
                 t_entrys[key] = 0
         t_entrylist = {}
-        for i in range(1,nrange):
+        for i in range(1,nrange + 1):
             t_entrylist[i] = []
         for key in t_entrys:
             t_entrylist[len(key.split(' '))].append(t_entrys[key])
         t_entrymean = {}
         t_entrystd = {}
-        for i in range(1,nrange):
+        for i in range(1,nrange + 1):
             t_entrymean[i] = np.mean(np.array(t_entrylist[i]))
             t_entrystd[i] = np.std(np.array(t_entrylist[i]),ddof = 1)
         for key in t_entrys:
@@ -193,15 +202,16 @@ class voters:
         t_entrys:dict entry table
 
         """
+        t_lo = 0
         t_len = len(itom_s)
         i = 1
         t_min_fre = 100
         t_max_entry = -100
         t_fre_lo = -1
         t_entry_lo = -1
-        while(i < t_len):
+        while(i <= t_len):
             t_pre = self.s2key(itom_s[0:i])
-            if i < t_len - 1:
+            if i < t_len:
                 t_last = self.s2key(itom_s[i:t_len])
             else:
                 t_last = "300"
@@ -227,19 +237,36 @@ class voters:
         """
         t_len = len(sequence)
         i = 0
-        f_fres = []
-        f_entrys = []
-        while(i < t_len - win_L):
+        f_fres = {}
+        f_entrys = {}
+        while(i < t_len):
             if i < t_len - win_L:
                 t_fre,t_entry = self.vote_item(sequence[i:i+win_L],t_frer,t_entrys)
             else:
                 t_fre,t_entry = self.vote_item(sequence[i:t_len],t_frer,t_entrys)
-            f_fres.append(i + t_fre)
-            f_entrys.append(i + t_entry)
+            t_f_item = i + t_fre
+            t_e_item = i + t_entry
+            if t_f_item not in f_fres:
+                f_fres[t_f_item] = 1
+            else:
+                f_fres[t_f_item] = f_fres[t_f_item] + 1
+            if t_e_item not in f_entrys:
+                f_entrys[t_e_item] = 1
+            else:
+                f_entrys[t_e_item] = f_entrys[t_e_item] + 1
+            #f_fres.append(i + t_fre)
+            #f_entrys.append(i + t_entry)
+            i = i + 1
+        i = 0
+        while(i < win_L):
+            if i in f_fres:
+                f_fres[i] = f_fres[i] * (win_L / i)
+            if i in f_entrys:
+                f_entrys[i] = f_entrys[i] * (win_L / i)
             i = i + 1
         return f_fres,f_entrys
 
-    def vote_singlese(self,t_los,way,T):
+    def vote_singlese(self,t_los, model, way,T = 0,r = 0):
         """
         funtion: get final los for one messages
         t_los:vote locations(dict)
@@ -247,19 +274,41 @@ class voters:
         T:vote threshold:int
         return: final locations(set)
         """
-        t_flos = set()
+        t_flos = []
         for key in t_los:
             t_now = t_los[key]
             pre_key = key - 1
             last_key = key + 1
             t_pre = 0 if pre_key not in t_los else t_los[pre_key]
             t_last = 0 if last_key not in t_los else t_los[last_key]
-            if way == 'normal':
+            if model == "abs" and way == "normal":
                 if t_now > T and t_now > t_pre and t_now > t_last:
-                    t_flos.add(key)
+                    t_flos.append(key)
+            elif model == "abs" and way == "loose":
+                if key != 1:
+                    if t_now > T and ((t_now > t_pre) or (t_now > t_last)):
+                        t_flos.append(key)
+                else:
+                    if t_now > T and ((t_now > t_pre) and (t_now > t_last)):
+                        t_flos.append(key)
+            elif model == "re" and way == "normal":
+                if key != 1:
+                    if t_now > T and (((t_pre == 0) or (t_now/t_pre > 1 + r)) and ((t_last == 0) or (t_now/t_last > 1 + r))):
+                    # print(key)
+                        t_flos.append(key)
+                else:
+                    if t_now > T and ((t_last == 0) or (t_now/t_last > 1 + r)):
+                    # print(key)                        
+                        t_flos.append(key)
+            elif model == "re" and way == "loose":
+                if key != 1:
+                    if t_now > T and (((t_pre == 0) or (t_now/t_pre > 1 + r)) or ((t_last == 0) or (t_now/t_last > 1 + r))):
+                        t_flos.append(key)
+                else:
+                    if t_now > T and ((t_last == 0) or (t_now/t_last > 1 + r)):
+                        t_flos.append(key)
             else:
-                if t_now > T and ((t_now > t_pre) or (t_now > t_last)):
-                    t_flos.add(key)
+                print("error")
         return t_flos
             
 
@@ -279,17 +328,100 @@ class voters:
         return:a list of final locations
         """
         t_fsequence = []
-        for sequence in sequences:
-            t_setemp = {}
-            for t_lo in sequence:
-                if t_lo not in t_setemp:
-                    t_setemp[t_lo] = 1
-                else:
-                    t_setemp[t_lo] = t_setemp[t_lo] + 1
+        for t_setemp in sequences:
             t_temp_lo = sorted(t_setemp.items(),key = lambda x:x[0])
+            print(t_temp_lo)
             t_temp_lo = self.tulple2dic(t_temp_lo)
             t_fsequence.append(self.vote_singlese(t_temp_lo,way,T))
         return t_fsequence
+
+    def get_gvotes(self,sentences):
+        """
+        F: get global voting results
+        sentences: list of bytes (messages set)
+        way:caculate ways
+        """
+        t_flos = {}
+        for sentence in sentences:
+            for key in sentence:
+                if key not in t_flos:
+                    t_flos[key] = sentence[key]
+                else:
+                    t_flos[key] = t_flos[key] + sentence[key]
+        return t_flos
+
+    def merge_splits(self,seq1,seq2):
+        s_los = set()
+        for key in seq1:
+            s_los.add(key)
+        for key in seq2:
+            s_los.add(key)
+        l_los = list(s_los)
+        l_los.sort()
+        return l_los
+ 
+    def filter_los(self,los,length):
+        t_los = 0
+        drop_keys = []
+        for key in los:
+            if key > length:
+                drop_keys.append(key)
+            if key == length:
+                t_los = 1
+        for key in drop_keys:
+            los.pop(key)
+        if t_los == 0:
+            los[length] = 1
+        return los
+
+
+    def get_info(self,messages,h,ways = "g",combine = "no",model = "abs", v_way="normal",T=0,r=0,stren = "no"):
+        t_dics = self.get_keywords(messages,h + 1)
+        t_fres = self.get_frequent(t_dics,h + 1)
+        t_fres["300"] = 0
+        self.words_fre = t_fres
+        t_entrys = self.get_backentry(t_dics,h + 1)
+        self.words_entry = t_entrys
+        self.words_table = t_dics
+        t_mes_frelos = []
+        t_me_entry_los = []
+        for i in range(len(messages)):
+            t_fre_r,t_entry_r = self.vote_sequence(messages[i],h,t_fres,t_entrys)
+            t_fre_r = self.filter_los(t_fre_r,int(len(messages[i]) - h))
+            t_entry_r = self.filter_los(t_entry_r,int(len(messages[i]) - h))
+            t_mes_frelos.append(t_fre_r)
+            t_me_entry_los.append(t_entry_r)
+        if ways == "g" and combine == "no":
+            lo_f = self.get_gvotes(t_mes_frelos)
+            lo_e = self.get_gvotes(t_me_entry_los)
+            t_lastone = lo_f[max(lo_f,key = lo_f.get)]
+            t_lasttwo = lo_e[max(lo_e,key = lo_e.get)]
+            last_f = max(t_lastone,t_lasttwo)
+            #print(lo_f)
+            #print(lo_e)
+            lo_vf = self.vote_singlese(lo_f, model, v_way, T, r)
+            lo_ve = self.vote_singlese(lo_e, model, v_way, T, r)
+            #print(lo_vf)
+            #print(lo_ve)
+            t_results = self.merge_splits(lo_vf,lo_ve)
+            if t_results[-1] < last_f:
+                t_results.append(-1)
+            print(t_results)
+#print(t_results)
+
+        elif ways == "g" and combine == "yes":
+            sum_los = []
+            sum_los.extend(t_mes_frelos)
+            sum_los.extend(t_me_entry_los)
+            sum_Tlos = self.get_gvotes(sum_los)
+            t_lasts = sum_Tlos[-1]
+            t_results = self.vote_singlese(sum_Tlos,way=v_way)
+            if(t_results[-1] < t_lasts):
+                t_results.append(-1)
+        
+        return t_results
+
+
         
                 
 
@@ -298,30 +430,31 @@ class voters:
 
             
 
+"""        
         
-        
-        
-
-datas = readdata.read_datas('/home/wxw/data/cip_datanew/')
+datas = readdata.read_datas('/home/wxw/data/iec104/')
 messages = readdata.get_puredatas(datas)
             
 start = time.time()
 voter = voters()
+t_r = voter.get_info(messages,4,r=0.1)
+print(t_r)
+print(len(voter.words_table))
+"""
+"""
 t_dics = voter.get_keywords(messages,5)
 t_fres = voter.get_frequent(t_dics,6)
 t_fres["300"] = 0
 t_entrys = voter.get_backentry(t_dics,6)
 t_mes_frelos = []
 t_me_entry_los = []
-for i in range(len(messages)):
+for i in range(5):
     t_fre_r,t_entry_r = voter.vote_sequence(messages[i],5,t_fres,t_entrys)
-    t_mes_frelos.append(t_fre_r)
     t_me_entry_los.append(t_entry_r)
-t_results = voter.get_voter(t_mes_frelos,'normal',0)
+#t_results = voter.get_voter(t_mes_frelos,'normal',0)
+t_results = voter.get_voter(t_me_entry_los,'normal',0)    
 print(t_results)
-
 end = time.time()
 print(end - start)
-
-
+"""
            

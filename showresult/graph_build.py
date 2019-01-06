@@ -9,6 +9,13 @@ class tree_graph:
         graph_type: graph_type | tree or graph
         datas: graph datas
         """
+        self.colors = {}
+        self.colors["C"] = "grey"
+        self.colors["S"] = "yellow"
+        self.colors["L"] = "blue"
+        self.colors["F"] = "red"
+        self.colors["O"] = "white"
+        self.colors["D"] = "black"
         print("aaa")
 
     def tree2graph(self):
@@ -27,16 +34,33 @@ class tree_graph:
         """
         t_nodes = graph_datas['nodes']
         t_edges = graph_datas['edges']
-        t_graph = graphviz.Dot()
+        t_graph = graphviz.Dot(graph_type="graph")
         for node in t_nodes:
             t_graph.add_node(node)
         for edge in t_edges:
             t_graph.add_edge(edge)
         #graph = graphviz.graph_from_dot_data(t_graph.getvalue())
-        t_graph.write_png("exampleone.png")
+        t_graph.write_png("examplefour.png")
+
+    def graph_build(self,nodes,edges):
+        Nodes = []
+        Edges = []
+        for node in nodes:
+            t_Node = Node(str(node[0]),label = str(node[1]),shape = "circle",color=self.colors[node[2]],fillcolor=self.colors[node[2]])
+            Nodes.append(t_Node)
+        for edge in edges:
+            if len(edge) > 2:
+                t_Edge = Edge(edge[0],edge[1],label=edge[2])
+            else:
+                t_Edge = Edge(edge[0],edge[1])
+            Edges.append(t_Edge)
+        graphs = {}
+        graphs["nodes"] = Nodes
+        graphs["edges"] = Edges
+        self.graph2fig(graphs,"ccc")
     
     def test(self):
-        S0 = Node("s0")
+        S0 = Node("s0",shape="circle",color="yellow")
         S11 = Node("s11")
         S12 = Node("s12")
         #S13 = Node("s13")
@@ -62,6 +86,13 @@ class tree_graph:
         t_graph["nodes"] = [S11,S12,S0,S21,S22,S23,S24,Se]
         t_graph["edges"] = [e01,e02,e11,e21,e23,e22,e31,e32,e33,e34]
         self.graph2fig(t_graph,"bbb")
+def f_modbus():
+    Nodes = [(1,0,"S"),(1,1,"O"),(2,2,"C"),(3,5,"L"),(4,6,"C"),(7,7,"F"),(8,8,"O"),(9,10,"O"),(10,11,"O"),(11,7,"F"),(12,8,"O"),(13,10,"O"),(14,11,"O"),(15,7,"F"),(16,8,"O"),(17,11,"O"),(18,16,"O"),(19,23,"O"),(20,24,"D"),(21,7,"F"),(22,8,"O"),(23,9,"O"),(24,12,"O"),(25,13,"D")]
+    Edges = [(0,1),(1,2),(2,3),(3,4),(4,7,"02"),(4,11,"01"),(4,15,"04"),(4,21,"15"),(7,8),(8,9),(9,10),(10,11),(11,12),(12,13),(13,14),(15,16),(16,17),(17,18),(18,19),(19,20),(21,22),(22,23),(23,24),(24,25)]
+    tree = tree_graph("a","B")
+    tree.graph_build(Nodes,Edges)
+    
 
-tree = tree_graph("a","B")
-tree.test()
+f_modbus()   
+#tree = tree_graph("a","B")
+#tree.test()

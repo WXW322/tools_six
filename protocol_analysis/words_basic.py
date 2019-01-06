@@ -10,6 +10,7 @@ from matplotlib import pyplot as plt
 
 class words_base:
     def __init__(self):
+        print("mm")
         self.tt = None
 
 
@@ -48,6 +49,7 @@ class words_base:
         :param lo_e:end location
         :return:prob info
         """
+        print("enter")
         t_result = {}
         t_prob = {}
         i = 0
@@ -77,8 +79,11 @@ class words_base:
         t_result = sorted(t_result.items(), key=lambda d: d[1], reverse=True)
         #t_result = dict((x,y) for x,y in t_result)
         t_prob = sorted(t_prob.items(),key = lambda d:d[1],reverse=True)
-
-
+        print("aa")
+        print(t_result)
+        print(t_prob)
+        #print(t_datas)
+        sys.exit()
         return t_result,t_prob,t_datas
 
     def get_pureproinfo(self,series_list,lo_s,lo_e):

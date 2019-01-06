@@ -1,13 +1,17 @@
 from netzob.all import *
+from queue import queue
+from Node import *
 
 class Mtree(Field):
-    def __init__(self,messages,ids,threshold,start,end,t_type = "const"):
+    def __init__(self,messages,ids,threshold,start,end = -1,t_type = "const"):
         super(Mtree,self).__init__()
         self.Nodes = ids
         self.state = "start"
         self.threshold = threshold
         self.type = t_type
-        self.los = (start,end)
+        self.start = start
+        self.end = end
+    
         self.messages = messages
 
     def splitbylos(self):
@@ -31,9 +35,9 @@ class Mtree(Field):
                 del t_los[key]
         for key in t_los:
             if key != "variable":
-                t_mtree = Mtree(messages,t_los[key],threshold,self.los[1],key)
+                t_mtree = Mtree(messages,t_los[key],threshold,self.end,key)
             else:
-                t_mtree = Mtree(messages,t_los[key],threshold,self.los[1],key,"V")
+                t_mtree = Mtree(messages,t_los[key],threshold,self.end,key,"V")
             self.fields.append(t_mtree)
         #return t_los
 
@@ -73,6 +77,21 @@ class Mtree(Field):
             if t_lo == 0:
                 break
             t_dep = t_dep + 1
+
+
+    def print_exptree(self):
+        queue = Queue()
+        # print(self.start,self.end)
+        queue.put(self)
+        while(not queue.empty()):
+            t_f = queue.get()
+            print(t_f.start,t_f.end)
+            for f in t_f.fields:
+                t_f.put(f)
+                
+
+
+
 
 
 

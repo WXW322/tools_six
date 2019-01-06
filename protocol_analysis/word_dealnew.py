@@ -31,6 +31,9 @@ class message_dealer:
         print(len(self.messages))
         self.semessages = t_sedatas
 
+    def set_messages(self,messages):
+        self.messages = messages
+
     def set_conlo(self,los):
         self.condilo = los
 
@@ -56,9 +59,9 @@ class message_dealer:
     def find_constone(self, lo_b, lo_e):
         # develop absolute or relative
         conster = words_basic.words_base()
-        t_messages = []
-        for message in self.messages:
-            t_messages.append(message.data)
+        t_messages = self.messages
+        #for message in self.messages:
+        #    t_messages.append(message.data)
         t_r, t_l, _ = conster.get_logapinfo(t_messages, lo_b, lo_e)
         if (t_l[0][1] > 0.98):
             return 1
@@ -67,9 +70,9 @@ class message_dealer:
 
     def get_constone(self,lo_b,lo_e):
         conster = words_basic.words_base()
-        t_messages = []
-        for message in self.messages:
-            t_messages.append(message.data)
+        t_messages = self.messages
+        #for message in self.messages:
+        #    t_messages.append(message.data)
         t_r, t_l, _ = conster.get_pureproinfo(t_messages, lo_b, lo_e)
         return int.from_bytes(t_l[0][0],byteorder='little',signed=False)
 
@@ -119,16 +122,12 @@ class message_dealer:
 
     def find_len(self, datas, lo_s, lo_e):
         t_lener = words_basic.words_base()
-        t_messages = []
-        for message in self.messages:
-            t_messages.append(message.data)
+        t_messages = self.messages
+        #for message in self.messages:
+        #    t_messages.append(message.data)
         t_dataone, t_datatwo, t_lens = t_lener.get_lengthinfo(t_messages, lo_s, lo_e)
-        print(t_datatwo)
-        print(t_lens)
         p_one = self.pearson(t_dataone, t_lens)
         p_two = self.pearson(t_datatwo, t_lens)
-        print(p_one)
-        print(p_two)
         if (p_one > 0.9 or p_two > 0.9):
             return 1
         else:
@@ -136,12 +135,10 @@ class message_dealer:
 
     def find_lenbyaccu(self, lo_s, lo_e):
         t_lener = words_basic.words_base()
-        t_messages = []
-        for message in self.messages:
-            t_messages.append(message.data)
+        t_messages = self.messages
+        #for message in self.messages:
+        #    t_messages.append(message.data)
         t_dataone, t_datatwo, t_lens = t_lener.get_lengthinfo(t_messages, lo_s, lo_e)
-        #print(t_datatwo)
-        #print(t_lens)
         acc_big = 0
         for i in range(len(t_dataone)):
             if (abs((t_dataone[i] - t_lens[i])) <= 1):
@@ -150,9 +147,6 @@ class message_dealer:
         for i in range(len(t_datatwo)):
             if (abs((t_datatwo[i] - t_lens[i])) <= 1):
                 acc_small = acc_small + 1
-        #print(acc_big)
-        #print(acc_small)
-        #print(len(t_dataone))
         if ((acc_small / len(t_dataone)) > 0.8 or (acc_big / len(t_dataone)) > 0.8):
             return 1
         else:
@@ -179,13 +173,7 @@ class message_dealer:
         t_messages = []
         for message in messages:
             t_messages.append(message.data)
-        #print(len(t_messages))
         t_dataone, t_datatwo, t_series = t_lener.get_seidinfo(t_messages, lo_s, lo_e)
-        #print (len(t_dataone))
-        #print(t_dataone)
-        #print(t_datatwo)
-        #print(t_series)
-        j_one = self.pearson(t_dataone, t_series)
         j_two = self.pearson(t_datatwo, t_series)
         j_final = max(j_one, j_two)
         return j_final
@@ -214,21 +202,17 @@ class message_dealer:
     def find_constfunc(self, lo_b, lo_e):
         # develop absolute or relative
         conster = words_basic.words_base()
-        t_messages = []
-        for message in self.messages:
-            t_messages.append(message.data)
+        t_messages = self.messages
+        #for message in self.messages:
+        #    t_messages.append(message.data)
         t_r, t_l, _ = conster.get_logapinfo(t_messages, lo_b, lo_e)
-        #t_lo = 1 - lo_b / L
-        #t_num = 1 - len(t_r) / 255
         t_en = 0
         for t_pro in t_l:
             t_en = t_en + t_pro[1] * np.log(t_pro[1])
         t_en = -t_en
-        #print(t_l)
-        #print(t_lo,t_num,t_en)
         return t_en,len(t_l)
 
-    def find_func(self,t_idoms,h_len):
+    def find_func(self,t_idoms,h_len,T):
         t_max = -10000
         t_f = None
         t_es = []
@@ -236,6 +220,7 @@ class message_dealer:
         t_L = t_idoms[-1][1]
         t_E = -100
         t_C = -100
+        T_f = []
         for t_idom in t_idoms:
             t_en,t_l = self.find_constfunc(t_idom[0],t_idom[1])
             if t_E < t_en:
@@ -252,13 +237,16 @@ class message_dealer:
             t_eum = 1 - t_es[i]/t_E
             t_cum = 1 - t_cs[i]/t_C
             t_fnum = t_num * t_eum * t_cum
+            if t_fnum > T:
+                T_f.append(t_idoms[i])
             if (t_fnum > t_max):
                 t_max = t_fnum
                 t_f = t_idoms[i]
             i = i + 1
 
 
-        return t_f
+        return t_f,t_f
+
 
 
     def find_head(self):
@@ -272,10 +260,8 @@ class message_dealer:
     def get_loinfo(self,location):
         l_s = location[0]
         l_e = location[1]
-        #location_f = words_deal.message_dealer(datas)
         standardout = sys.stdout
-        #file = open(info_dir, 'w+')
-        sys.stdout = file
+        #sys.stdout = file
         if (self.find_constone(l_s,l_e) == 1):
             return 1
         elif(self.find_lenbyaccu(l_s,l_e) == 1):
@@ -284,7 +270,7 @@ class message_dealer:
             return 3
         else:
             return 4
-        sys.stdout = standardout
+        #sys.stdout = standardout
 
 
     def takefirst(self,elem):
@@ -359,6 +345,9 @@ class message_dealer:
                 t_idoms.remove(t_idom)
         t_words = {}
         for t_idom in t_idoms:
+            if t_idom[1] == -1:
+                t_words[t_idom] = 6
+                continue
             t_info = self.get_loinfo(t_idom)
             if t_info != 4:
                 t_words[t_idom] = t_info
@@ -366,8 +355,12 @@ class message_dealer:
         for t_idom in t_idoms:
             if(t_idom not in t_words):
                 t_funcs.append(t_idom)
-        t_funw = self.find_func(t_funcs,head)
-        t_words[t_funw] = 0
+        t_funw,T_f = self.find_func(t_funcs,head,T)
+        if stra == "normal":
+            t_words[t_funw] = 0
+        else:
+             for t_f in T_f:
+                t_words[t_f] = 0
         for t_idom in t_idoms:
             if t_idom not in t_words:
                 t_words[t_idom] = 6
@@ -376,7 +369,6 @@ class message_dealer:
     def idomtobor(self,borders):
         t_borders = []
         for t_idom in borders:
-            print(t_idom[0])
             t_borders.append(t_idom[0])
         t_borders.append(borders[-1][1])
         return t_borders
@@ -417,7 +409,7 @@ class message_dealer:
 
 
 
-
+"""
 def t_fone(s_file,r_outfile,t_s,t_r):
     Me = message_dealer()
     Me.read_datas(s_file)
@@ -483,7 +475,7 @@ Me.read_datas('/home/wxw/data/modbusdata')
 #t_two('/home/wxw/data/cip_datanew','/home/wxw/paper/researchresult/cip/borders/base/out',[(0, 2), (2, 4), (4, 6), (6, 9), (9, 13), (13, 17), (17, 20), (20, 22)],[(0, 2), (2, 4), (4, 8), (8, 12), (12, 20), (20, 24)])
 #t_fone('/home/wxw/data/cip_datanew','/home/wxw/paper/researchresult/cip/borders/ours/out',[(0, 2), (2, 3), (3, 4), (4, 6), (6, 7), (7, 10), (10, 11), (11, 12), (12, 15), (15, 16), (16, 17), (17, 18), (18, 20), (20, 23)],[(0, 2), (2, 4), (4, 8), (8, 12), (12, 20), (20, 24)])
 """
-
+"""
 Me = message_dealer()
 
 Me.read_datas('/home/wxw/data/cip_datanew')

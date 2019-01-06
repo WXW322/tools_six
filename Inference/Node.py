@@ -1,4 +1,4 @@
-from netzob.all import 8
+from netzob.all import * 
 
 class Node:
     def __init__(self,m_id,sequence):
@@ -7,6 +7,8 @@ class Node:
         self.lo = 0
     
     def get_next(self):
+        if self.lo == len(self.sequence)
+            return -1
         return self.sequence[self.lo + 1]
 
     def go_next(self):

@@ -7,6 +7,8 @@ import sys
 import words_basic
 import numpy as np
 sys.path.append('../deal_data')
+sys.path.append('../common/')
+import f_cg
 import session_deal
 
 class message_dealer:
@@ -56,7 +58,7 @@ class message_dealer:
 
 
 
-    def find_constone(self, lo_b, lo_e,data="no"):
+    def find_constone(self, lo_b, lo_e,data="no",T_c=0.98):
         # develop absolute or relative
         conster = words_basic.words_base()
         t_messages = []
@@ -71,7 +73,7 @@ class message_dealer:
         #print(len(conster.get_logapinfo(t_messages,lo_b,lo_e)))
         
         t_r, t_l,_,_,_ = conster.get_logapinfo(t_messages,lo_b,lo_e)
-        if (t_l[0][1] > 0.98):
+        if (t_l[0][1] > T_c):
             return 1
         else:
             return 0
@@ -145,7 +147,44 @@ class message_dealer:
         else:
             return 0
 
-    def find_lenbyaccu(self, lo_s, lo_e,data="no"):
+    def find_lenbyaccuone(self, lo_s, lo_e, data="no",T_l=0.8):
+        t_lener = words_basic.words_base()
+        t_messages = []
+        if data == "no":
+            for message in self.messages:
+                t_messages.append(message.data)
+        else:
+            t_messages = self.messages
+        t_dataone, t_datatwo, t_lens = t_lener.get_lengthinfo(t_messages, lo_s, lo_e)
+        #print(t_datatwo)
+        #print(t_lens)
+        acc_big = 0
+        data_nums = {}
+        data_smalls = {}
+        for i in range(len(t_dataone)):
+            diff = abs(t_dataone[i] - t_lens[i])
+            if diff not in data_nums:
+                data_nums[diff] = 1
+            else:
+                data_nums[diff] = data_nums[diff] + 1
+        acc_small = 0
+        for i in range(len(t_datatwo)):
+            diff = abs(t_datatwo[i] - t_lens[i])
+            if diff not in data_smalls:
+                data_smalls[diff] = 1
+            else:
+                data_smalls[diff] = data_smalls[diff] + 1
+
+        #print('len:','(',lo_s,',',lo_e,')',acc_small / len(t_dataone),acc_big / len(t_dataone))
+        #print(acc_big)
+        #print(acc_small)
+        #print(len(t_dataone))
+        if ((acc_small / len(t_dataone)) > T_l or (acc_big / len(t_dataone)) > T_l):
+            return 1
+        else:
+            return 0
+
+    def find_lenbyaccu(self, lo_s, lo_e, T_l, data="no"):
         t_lener = words_basic.words_base()
         t_messages = []
         if data == "no":
@@ -164,14 +203,17 @@ class message_dealer:
         for i in range(len(t_datatwo)):
             if (abs((t_datatwo[i] - t_lens[i])) <= 1):
                 acc_small = acc_small + 1
+        #print('len:','(',lo_s,',',lo_e,')',acc_small / len(t_dataone),acc_big / len(t_dataone))
         #print(acc_big)
         #print(acc_small)
         #print(len(t_dataone))
-        if ((acc_small / len(t_dataone)) > 0.8 or (acc_big / len(t_dataone)) > 0.8):
+        if ((acc_small / len(t_dataone)) > T_l or (acc_big / len(t_dataone)) > T_l):
             return 1
         else:
             return 0
 
+    def resplit(self):
+        print('111')
 
     def ressemb(self, datas, lo):
         t_puredata = []
@@ -194,15 +236,18 @@ class message_dealer:
         #print(len(t_messages))
         t_dataone, t_datatwo, t_series = t_lener.get_seidinfo(t_messages, lo_s, lo_e)
         #print (len(t_dataone))
-        #print(t_dataone)
-        #print(t_datatwo)
-        #print(t_series)
         j_one = self.pearson(t_dataone, t_series)
         j_two = self.pearson(t_datatwo, t_series)
         j_final = max(j_one, j_two)
+        if lo_s == 1:
+            print("start")
+            print(lo_s,lo_e)
+            print(t_dataone)
+            print(t_datatwo)
+            print(t_series)
         return j_final
 
-    def findseid(self,lo_s,lo_e):
+    def findseid(self,lo_s,lo_e,T_I=0.7):
         t_serate = 0
         i = 0
         t_clus = session_deal.session_deal("")
@@ -216,7 +261,8 @@ class message_dealer:
             t_serate = t_serate + t_num
             i = i + 1
         t_rate = t_serate/i
-        if(t_rate > 0.7):
+        #print("se: " + '(' + str(lo_s) + ',' + str(lo_e) + ')' + str(t_rate))
+        if(t_rate > T_I):
             return 1
         else:
             return 0
@@ -232,7 +278,7 @@ class message_dealer:
                 t_messages.append(message.data)
         else:
             t_messages = self.messages
-        t_r, t_l, _ = conster.get_logapinfo(t_messages, lo_b, lo_e)
+        t_r, t_l, _,_,_ = conster.get_logapinfo(t_messages, lo_b, lo_e)
         #t_lo = 1 - lo_b / L
         #t_num = 1 - len(t_r) / 255
         t_en = 0
@@ -243,7 +289,7 @@ class message_dealer:
         #print(t_lo,t_num,t_en)
         return t_en,len(t_l)
 
-    def find_func(self,t_idoms,h_len,T=0):
+    def find_func(self,t_idoms,h_len,T=0,data="no"):
         t_max = -10000
         t_f = None
         t_es = []
@@ -253,7 +299,7 @@ class message_dealer:
         t_C = -100
         T_f = []
         for t_idom in t_idoms:
-            t_en,t_l = self.find_constfunc(t_idom[0],t_idom[1])
+            t_en,t_l = self.find_constfunc(t_idom[0],t_idom[1],data)
             if t_E < t_en:
                 t_E = t_en
             if t_C < t_l:
@@ -276,7 +322,7 @@ class message_dealer:
             i = i + 1
 
 
-        return t_f
+        return t_f,T_f
 
 
     def find_head(self):
@@ -287,31 +333,32 @@ class message_dealer:
                 min_len = t_len
         return min_len
 
-    def get_loinfo(self,location):
+    def get_loinfo(self,location,T_c,T_l,T_s):
         l_s = location[0]
         l_e = location[1]
         #location_f = words_deal.message_dealer(datas)
         #file = open(info_dir, 'w+')
         #sys.stdout = file
-        if (self.find_constone(l_s,l_e) == 1):
+        if (self.find_constone(l_s,l_e,T_c) == 1):
             return 1
-        elif(self.find_lenbyaccu(l_s,l_e) == 1):
+        elif(self.find_lenbyaccu(l_s,l_e,T_l) == 1):
             return 2
-        elif(self.findseid(l_s,l_e) == 1):
+        elif(self.findseid(l_s,l_e,T_s) == 1):
             return 3
         else:
             return 4
 
 
-    def get_datainfo(self,location,data):
+
+    def get_datainfo(self,location,T_c,T_l,T_f,data):
         l_s = location[0]
         l_e = location[1]
         #location_f = words_deal.message_dealer(datas)
         #file = open(info_dir, 'w+')
         #sys.stdout = file
-        if (self.find_constone(l_s,l_e,data) == 1):
+        if (self.find_constone(l_s,l_e,T_c,data) == 1):
             return 1
-        elif(self.find_lenbyaccu(l_s,l_e,data) == 1):
+        elif(self.find_lenbyaccu(l_s,l_e,T_l,data) == 1):
             return 2
         else:
             return 4
@@ -331,7 +378,7 @@ class message_dealer:
             t_middle = t_pre + 1
             if(t_idom[1] - t_idom[0] <= 2):
                 if(t_idom[1] - t_idom[0] == 2):
-                    if(self.find_constone(t_idom[0],t_idom[0] + 1,way) and self.get_constone(t_idom[0],t_idom[0] + 1,way) != 0):
+                    if(self.find_constone(t_idom[0],t_idom[0] + 1,way) and self.find_constone(t_idom[0],t_idom[0] + 1,way) != 0):
                         t_pre = t_idom[0]
                         t_middle = t_pre + 1
                         t_last = t_idom[1]
@@ -340,7 +387,7 @@ class message_dealer:
                         self.condilo.append((t_middle, t_last))
                         self.condilo.sort(key=self.takefirst)
                         t_len = t_len + 1
-                    elif(self.find_constone(t_idom[0] + 1,t_idom[1],way) and self.get_constone(t_idom[0] + 1,t_idom[1],way) != 0):
+                    elif(self.find_constone(t_idom[0] + 1,t_idom[1],way) and self.find_constone(t_idom[0] + 1,t_idom[1],way) != 0):
                         t_pre = t_idom[0]
                         t_middle = t_pre + 1
                         t_last = t_idom[1]
@@ -383,7 +430,7 @@ class message_dealer:
                 self.condilo.sort(key = self.takefirst)
             i = i + 1
 
-    def extract_words(self,t_idoms,head):
+    def extract_words(self,t_idoms,head,T_c,T_l,T_I):
         print(head)
         print(t_idoms)
         for t_idom in t_idoms:
@@ -391,14 +438,14 @@ class message_dealer:
                 t_idoms.remove(t_idom)
         t_words = {}
         for t_idom in t_idoms:
-            t_info = self.get_loinfo(t_idom)
+            t_info = self.get_loinfo(t_idom,T_c,T_l,T_I)
             if t_info != 4:
                 t_words[t_idom] = t_info
         t_funcs = []
         for t_idom in t_idoms:
             if(t_idom not in t_words):
                 t_funcs.append(t_idom)
-        t_funw = self.find_func(t_funcs,head)
+        t_funw,_ = self.find_func(t_funcs,head)
         t_words[t_funw] = 0
         for t_idom in t_idoms:
             if t_idom not in t_words:
@@ -416,7 +463,7 @@ class message_dealer:
         for t_idom in t_idoms:
             if(t_idom not in t_words):
                 t_funcs.append(t_idom)
-        t_funw,T_f = self.find_func(t_funcs,head,T)
+        t_funw,T_f = self.find_func(t_funcs,head,T,data="yes")
         for t_f in T_f:
             t_words[t_f] = 0
         for t_idom in t_idoms:
@@ -470,26 +517,29 @@ class message_dealer:
 
 
 
-def t_fone(s_file,r_outdir,t_s,t_r):
+def t_fone(s_file,r_outdir,t_s,t_r,T_c,T_l,T_I):
     Me = message_dealer()
     Me.read_datas(s_file)
     standardout = sys.stdout
-    outpath = r_outdir
+    #outpath = r_outdir
     # outpath = os.path.join(r_outdir,'mout')
     #fileone = open(outpath, 'w+')
     #sys.stdout = fileone
+    transer = f_cg.transer()
+    t_s = transer.border2item(t_s)
     Me.set_conlo(t_s)
     Me.set_rlo(t_r)
-    Me.resplit()
-    Me.reclus()
+    #Me.resplit()
+    #Me.reclus()
     #Me.get_f1()
-    t_head = Me.find_head()
-    t_fhead = min(23,t_head + 2)
-    words_path = os.path.join(r_outdir,'wordsf_out')
+    #t_head = Me.find_head()
+    #t_fhead = min(23,t_head + 2)
+    words_path = os.path.join(r_outdir,'temp' + str(T_c) + str(T_l) + str(T_I) + 'words_twoout')
+    t_fhead = transer.get_range(0.8,Me.messages)
     t_w = open(words_path,'w+')
     sys.stdout = t_w
     t_idoms = Me.condilo
-    t_results = Me.extract_words(t_idoms,t_fhead)
+    t_results = Me.extract_words(t_idoms,t_fhead,T_c,T_l,T_I)
     t_results = sorted(t_results.items(),key = lambda x:x[0][0])
     print(t_results)
     
@@ -537,11 +587,17 @@ def get_words(file_to,data_file,borders):
 
 
 
-
-
-
 """
-t_fone('/home/wxw/data/modbusdata','/home/wxw/paper/researchresult/words_find/modbus/',[(0, 2), (2, 3), (3, 5), (5, 7), (7, 8), (8, 9), (9, 11), (11, 12), (12, 14), (14, 16), (16, 17), (17, 19), (19, 20)],[(0,2),(2,4),(4,6),(6,7),(7,8)])
+T_c = 0.98
+T_l = 0.8
+T_I = 0.7
+
+t_fone('/home/wxw/data/modbusdata','/home/wxw/paper/researchresult/words_find/modbus/',[1, 2, 5, 6, 7, 8, 9, 11, 12, 14, 17, 19, 20, 22, 23, 25, 29, 30, 32, 33, 35, 36, 39, 40, 41, 42, 44, 46, 47, 48, 50, 51, 52, 53],[(0,2),(2,4),(4,6),(6,7),(7,8)],T_c,T_l,T_I)
+"""
+#t_fone('/home/wxw/data/iec104','/home/wxw/paper/researchresult/words_find/iec104/',[1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 19, 20, 22, 23, 24, 26, 27, 28, 30, 31, 32, 34, 35, 36, 38, 39, 40],[(0,1),(1,2),(2,4),(4,6),(6,7),(7,8),(8,9),(9,10),(10,12)],T_c,T_l,T_I)
+
+#t_fone('/home/wxw/data/cip_datanew','/home/wxw/paper/researchresult/words_find/cip',[1, 2, 4, 6, 7, 8, 12, 16, 17, 20, 28, 29, 32, 33, 34, 35, 36, 38, 40, 41, 42, 44, 45, 46],[(0, 2), (2, 4), (4, 8), (8, 12), (12, 20), (20, 23),(23, 30),(30, 33),(33, 34),(34, 35)],T_c,T_l,T_I)
+"""
 #t_fone('/home/wxw/data/modbusdata','/home/wxw/paper/researchresult/words_find/modbus',[(0, 2), (2, 4), (4, 5), (5, 6), (6, 7), (7, 8), (8, 9), (9, 10), (10, 11), (11, 12), (12, 14), (14, 16), (16, 17), (17, 18), (18, 19)],[(0,2),(2,4),(4,6),(6,7),(7,8)])
 #t_two('/home/wxw/data/modbusdata','/home/wxw/paper/researchresult/modbus/borders/base/fourhout',[(0, 2), (2, 5), (5, 9), (9, 11)],[(0,2),(2,4),(4,6),(6,7),(7,8)])
 #t_two('/home/wxw/data/iec104','/home/wxw/paper/researchresult/iec104/borders/base/fourhout',[(0,3),(3,7),(7,10),(10,12),(12,15),(15,20),(20,23),(23,28)],[(0,1),(1,2),(2,4),(4,6),(6,7),(7,8),(8,9),(9,10),(10,12)])
