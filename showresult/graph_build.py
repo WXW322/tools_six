@@ -14,8 +14,8 @@ class tree_graph:
         self.colors["S"] = "yellow"
         self.colors["L"] = "blue"
         self.colors["F"] = "red"
-        self.colors["O"] = "white"
-        self.colors["D"] = "black"
+        self.colors["O"] = "green"
+        self.colors["D"] = "pink"
         print("aaa")
 
     def tree2graph(self):
@@ -34,7 +34,7 @@ class tree_graph:
         """
         t_nodes = graph_datas['nodes']
         t_edges = graph_datas['edges']
-        t_graph = graphviz.Dot(graph_type="graph")
+        t_graph = graphviz.Dot(graph_type="graph",rankdir="LR")
         for node in t_nodes:
             t_graph.add_node(node)
         for edge in t_edges:
@@ -46,7 +46,7 @@ class tree_graph:
         Nodes = []
         Edges = []
         for node in nodes:
-            t_Node = Node(str(node[0]),label = str(node[1]),shape = "circle",color=self.colors[node[2]],fillcolor=self.colors[node[2]])
+            t_Node = Node(str(node[0]),label = str(node[1]),shape = "circle",color = self.colors[node[2]],fillcolor=self.colors[node[2]],style="filled")
             Nodes.append(t_Node)
         for edge in edges:
             if len(edge) > 2:
@@ -86,13 +86,19 @@ class tree_graph:
         t_graph["nodes"] = [S11,S12,S0,S21,S22,S23,S24,Se]
         t_graph["edges"] = [e01,e02,e11,e21,e23,e22,e31,e32,e33,e34]
         self.graph2fig(t_graph,"bbb")
-def f_modbus():
-    Nodes = [(1,0,"S"),(1,1,"O"),(2,2,"C"),(3,5,"L"),(4,6,"C"),(7,7,"F"),(8,8,"O"),(9,10,"O"),(10,11,"O"),(11,7,"F"),(12,8,"O"),(13,10,"O"),(14,11,"O"),(15,7,"F"),(16,8,"O"),(17,11,"O"),(18,16,"O"),(19,23,"O"),(20,24,"D"),(21,7,"F"),(22,8,"O"),(23,9,"O"),(24,12,"O"),(25,13,"D")]
-    Edges = [(0,1),(1,2),(2,3),(3,4),(4,7,"02"),(4,11,"01"),(4,15,"04"),(4,21,"15"),(7,8),(8,9),(9,10),(10,11),(11,12),(12,13),(13,14),(15,16),(16,17),(17,18),(18,19),(19,20),(21,22),(22,23),(23,24),(24,25)]
+def f_modbus_src():
+    Nodes = [(0,0,"S"),(1,1,"O"),(2,2,"C"),(3,5,"L"),(4,6,"C"),(7,7,"F"),(8,8,"O"),(9,10,"O"),(10,11,"O"),(11,7,"F"),(12,8,"O"),(13,10,"O"),(14,11,"O"),(15,7,"F"),(16,8,"O"),(17,11,"O"),(18,16,"O"),(19,23,"O"),(20,24,"D"),(21,7,"F"),(22,8,"O"),(23,9,"O"),(24,12,"O"),(25,13,"D")]
+    Edges = [(0,1),(1,2),(2,3),(3,4),(4,7,"02"),(4,11,"01"),(4,15,"04"),(4,21,"15"),(7,8),(8,9),(9,10),(11,12),(12,13),(13,14),(15,16),(16,17),(17,18),(18,19),(19,20),(21,22),(22,23),(23,24),(24,25)]
     tree = tree_graph("a","B")
     tree.graph_build(Nodes,Edges)
+  
     
+def f_modbus_des():
+    Nodes = [(0,0,"S"),(1,1,"O"),(2,2,"C"),(3,5,"L"),(4,6,"C"),(7,7,"F"),(8,8,"O"),(9,9,"O"),(10,10,"D"),(11,7,"F"),(12,8,"O"),(13,9,"O"),(14,10,"O"),(15,11,"D"),(16,7,"F"),(17,8,"O"),(18,9,"O"),(19,14,"O"),(20,18,"O"),(21,"...","O"),(22,7,"F"),(23,8,"O"),(24,9,"O"),(25,10,"O")]
+    Edges = [(0,1),(1,2),(2,3),(3,4),(4,7,"02"),(4,11,"01"),(4,16,"04"),(4,22,"15"),(7,8),(8,9),(9,10),(11,12),(12,13),(13,14),(14,15),(16,17),(17,18),(18,19),(19,20),(20,21),(22,23),(23,24),(24,25)]
+    tree = tree_graph("a","B")
+    tree.graph_build(Nodes,Edges)
 
-f_modbus()   
+f_modbus_src()   
 #tree = tree_graph("a","B")
 #tree.test()

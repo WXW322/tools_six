@@ -109,12 +109,13 @@ def get_common(T_path,data_path,r_way,h,ways,combine,model,v_way,T,r,R_los):
 #for key in t_f:
 #    print(key,t_f[key])
 #parameters = [i*0.1 for i in range(1,11)]
-for h in [2,4]:
-    get_common("/home/wxw/paper/researchresult/modbus/bordertwo","/home/wxw/data/modbusdata/","single",h,"g","no","re","normal",0.1,0.1,[(0,2),(2,5),(5,6),(6,7),(7,8)])
 
-    get_common("/home/wxw/paper/researchresult/iec104/bordertwo/","/home/wxw/data/iec104/","single",h,"g","no","re","loose",0.1,0.1,[(0,1),(1,2),(2,4),(4,6),(6,7),(7,8),(8,9),(9,10),(10,12)])
+for h in [2,4]:
+#get_common("/home/wxw/paper/researchresult/modbus/bordertwo","/home/wxw/data/modbusdata/","single",h,"g","no","re","normal",0.1,0.1,[(0,2),(2,5),(5,6),(6,7),(7,8)])
+
+#   get_common("/home/wxw/paper/researchresult/iec104/bordertwo/","/home/wxw/data/iec104/","single",h,"g","no","re","loose",0.1,0.1,[(0,1),(1,2),(2,4),(4,6),(6,7),(7,8),(8,9),(9,10),(10,12)])
     
-    get_common("/home/wxw/paper/researchresult/cip/borderthree","/home/wxw/data/cip_datanew/","single",h,"g","no","re","normal",0.1,0.9,[(0, 2), (2, 4), (4, 8), (8, 12), (12, 20), (20, 24)])
+    get_common("/home/wxw/paper/researchresult/cip/borderfour","/home/wxw/data/cip_datanew/","single",h,"g","no","re","loose",0.1,0.9,[(0, 2), (2, 4), (4, 8), (8, 12), (12, 20), (20, 24)])
 
 """
 get_common("/home/wxw/paper/researchresult/modbus/bordertwo","/home/wxw/data/modbusdata/","single",4,"g","no","re","normal",0.1,0.1,[(0,2),(2,5),(5,6),(6,7),(7,8)])
@@ -143,13 +144,13 @@ print(end - start)
 
 #get_common("/home/wxw/paper/researchresult/cip/borderthree","/home/wxw/data/cip_datanew/","single",3,"g","no","re","normal",0.1,0.1,[(0, 2), (2, 4), (4, 8), (8, 12), (12, 20), (20, 24)])
 
-#get_common("/home/wxw/paper/researchresult/cip/borderthree","/home/wxw/data/cip_datanew/","single",3,"g","no","re","loose",0.1,0.1,[(0, 2), (2, 4), (4, 8), (8, 12), (12, 20), (20, 24)])
+#get_common("/home/wxw/paper/researchresult/cip/borderfour","/home/wxw/data/cip_datanew/","single",3,"g","no","re","loose",0.1,0.9,[(0, 2), (2, 4), (4, 8), (8, 12), (12, 20), (20, 24)])
 #last = time.time()
 #print(last - end)
 
 #get_f("/home/wxw/paper/researchresult/iec104/format","/home/wxw/data/iec104/","multiple","lo",(6,7),3,"g","no","re","normal",0.8,0.1)
 
-#get_f("/home/wxw/paper/researchresult/modbus/format","/home/wxw/data/modbusdata/","multiple","lo",(7,8),3,"g","no","abs","normal",0.8,0.1)
+#get_f("/home/wxw/paper/researchresult/modbus/format","/home/wxw/data/modbusdata/","multiple","lo",(7,8),3,"g","no","re","normal",0.8,0.1)
 
 
 #get_f("/home/wxw/paper/researchresult/modbus/format","/home/wxw/data/modbusdata/","multiple","lo",(7,8),3,"g","no","abs","loose",0.1,0.1)

@@ -17,14 +17,17 @@ def plot_linefigure(file_to,x_lable,y_lable,datas_X,datas_Y,colors,labels,makers
     #matplotlib.rc('xtick', labelsize=22) 
     #matplotlib.rc('ytick', labelsize=22)
     #plt.rcParams.update({'font.size': 18})
-    plt.xticks(np.arange(0.1,1.1,step=0.1),('0.1','0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9','1.0'))
-    plt.yticks(np.arange(0.0,1.2,step=0.2),['0.0','0.2','0.4','0.6','0.8','1.0'])
+    plt.xlim([0.1,1.0])
+    plt.ylim([0.0,1.05])
+    plt.xticks(np.arange(0.1,1.1,step=0.1),('0.1','0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9','1.0'),fontsize=10)
+    plt.yticks(np.arange(0.0,1.2,step=0.2),['0.0','0.2','0.4','0.6','0.8','1.0'],fontsize=10)
     #print(ys)
     #print(ylabels)
     #matplotlib.rcParams.update({'font.size': 22})
     #plt.xticks([1,2,3,4],['1','2','3','4'])
     #plt.yticks([1,2,3,4,5],[0.2,0.4,0.6,0.8,1.0])
-    plt.legend(loc=4)
+    #plt.legend(loc=4)
+    plt.legend()
     path = file_to
     #path = os.path.join(file_to,'linemodbustwo.jpg')
     plt.savefig(path)
@@ -133,6 +136,19 @@ def show_variable(file_to,val,type):
     sys.stdout = file
     print(val)
     sys.stdout = tempout
+
+
+
+datas_X = [[a for a in np.arange(0.1,1.1,step=0.1)] for _ in range(3)]
+datas_Y = [[1.0 for _ in range(10)],[1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.5,0.5],[1.0 for _ in range(10)]]
+x_lable = "T_R"
+y_lable = "Ratio"
+colors = ['r','b','g']
+labels = ['modbus','iec104','ethernet/cip']
+markers = ["o","+","s"]
+i = 0
+path = "static_len.jpg"
+plot_linefigure(path,x_lable,y_lable,datas_X,datas_Y,colors,labels,markers)
 """
 datas_X = [[1,2,3,4],[1,2,3,4],[1,2,3,4]]
 datas_f1mod = [[0,0.5000,0.2500,0.2857],[0,0.4444,0.4444,0.4444],[0,0.7692,0.8333,0.8333]]
@@ -155,9 +171,10 @@ datas_Ys.append(datas_preiec)
 datas_Ys.append(datas_recalliec)
 datas_Ys.append(datas_precip)
 datas_Ys.append(datas_recallcip)
-
+#
+parameter T,R sensitive
 paths = ['f1mod.jpg','f1iec.jpg','f1_cip.jpg','premod.jpg','recallmod.jpg','preiec.jpg','recalliec.jpg','precip.jpg','recallcip.jpg']
-"""
+
 datas_X = [[a for a in np.arange(0.1,1.1,step=0.1)] for _ in range(3)]
 datas_Y = [[0.9231 for _ in range(10)],[0.9091 for _ in range(10)],[0.5714 for _ in range(10)]]
 x_lable = "r"
@@ -172,9 +189,9 @@ path = "paraT.jpg"
 #path = "test.jpg"
 #plot_linefigure(path,x_lable,y_lable,datas_X,datas_Y,colors,labels,markers)
 plot_linefigure(path,x_lable,y_lable,datas_X,datas_Y,colors,labels,markers)
- 
+# 
 
-"""
+
 file_from = sys.argv[1]
 file_to = sys.argv[2]
 process_data(file_from,file_to,'threshold T',"rate")

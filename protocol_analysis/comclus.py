@@ -2,6 +2,7 @@ from netzob.all import *
 import os
 import time
 import sys
+import random
 
 def read_data(dir):
     paths = os.listdir(dir)
@@ -39,6 +40,7 @@ def get_tcount(clus,lo):
                 t_n['uu'] = 1
             else:
                 t_n['ss'] = 1
+            continue
         t_key = clu[t_s:t_e]
         if t_key not in t_n:
             t_n[t_key] = 1
@@ -203,7 +205,6 @@ def get_results(s_path,des_path,los,para):
     #t_tmes = clus_byfun(t_fdatas,los)
     #get_precess(t_tmes,los,t_funclus.keys())
 
-
 def get_basespes(s_path,des_path,los,para,lo):
     t_output = sys.stdout
     file = open(des_path,'w+')
@@ -232,6 +233,90 @@ def get_basespes(s_path,des_path,los,para,lo):
         #print_clus(t_M,'nw')
     #print('start')
     #get_precess(t_fmes,los,t_funclus.keys())
+
+def get_iecmk(data):
+    if(len(data) < 7):
+        tv = int.from_bytes(data[2:3],byteorder="big")
+        t_lo = 3&tv
+        if (t_lo == 3):
+            return "u"
+        else:
+            return "s"
+    else:
+         tv = int.from_bytes(data[7:8],byteorder="little")
+         t_lo = 1&tv
+         if (t_lo == 1):
+             return "single"
+         else:
+             return "mul"
+
+def get_keys(messages):
+    t_keys = {}
+    for message in messages:
+        t_key = get_iecmk(message)
+        if t_key not in t_keys:
+            t_keys[t_key] = 0
+    return t_keys
+
+def get_keysT(messages):
+    keys = {}
+    for message in messages:
+        t_keys = get_keys(message)
+        for t_key in t_keys:
+            if t_key not in t_keys:
+                t_keys[t_key] = 1
+    return t_keys 
+
+def get_keyc(clus,key):
+    t_lo = 0
+    for clu in clus:
+        keys = get_keys(clu)
+        if key in keys:
+            t_lo = t_lo + 1
+    return t_lo
+    
+
+def caculate(clus,keys):
+    t_r = 0
+    t_pre = 0
+    for clu in clus:
+        if(len(get_keys(clu)) == 1):
+            t_r = t_r + 1
+    for key in keys:
+        if get_keyc(clus,key) == 1:
+            t_pre = t_pre + 1
+    t_r = t_r / len(clus)
+    t_pre = t_pre / len(keys)
+    return t_r,t_pre,t_r*t_pre
+
+
+def get_iec104(s_path,des_path,los,para):
+
+    t_output = sys.stdout
+    file = open(des_path,'w+')
+    #sys.stdout = file
+    datas = read_data(s_path)
+    t_fdatas = [random.choice(datas) for _ in range(100)]
+    t_tmes = clus_byfun(t_fdatas,los)
+    T_keys = get_keys(t_fdatas)
+    t_or,t_op,t_oc = caculate(t_tmes,T_keys)
+    print(T_keys)
+    t_clus = clus_bynw(t_fdatas,para)
+    t_nmes = []
+    for t_clu in t_clus:
+        t_messages = t_clu.messages
+        t_M = []
+        for t_me in t_messages:
+            t_M.append(t_me.data)
+        t_nmes.append(t_M)
+    t_or,t_op,t_oc = caculate(t_tmes,T_keys)
+    t_nr,t_np,t_nc = caculate(t_nmes,T_keys)
+    print(t_or,t_op,t_oc)
+    print(t_nr,t_np,t_nc)
+
+
+    
+    
 
 def get_funcr(s_path,des_path,los,para):
     t_output = sys.stdout
@@ -287,9 +372,10 @@ def clus_byfun(t_fdatas,lo):
     t_final = {}
     for data in t_fdatas:
         if len(data) < lo[1]:
-            if "xx" not in t_final:
-                t_final["xx"] = []
-            t_final["xx"].append(data)
+            if "ss" not in t_final:
+                t_final["ss"] = []
+            t_final["ss"].append(data)
+            continue
         t_idom = data[lo[0]:lo[1]]
         if t_idom not in t_final:
             t_final[t_idom] = []
@@ -310,22 +396,27 @@ def clus_byfun(t_fdatas,lo):
 
 
 starttime = time.time()
+"""
 value = sys.argv[1]
 file_from = sys.argv[2]
 file_to = sys.argv[3]
 lo = sys.argv[4]
 start = sys.argv[5]
 end = sys.argv[6]
+"""
+
 #data = read_data('/home/wxw/data/modbustest')
 #clus_bynw(data)
 #for i in [80,70,60,50,40,30,20,10]:
 #get_results('/home/wxw/data/modbustest','/home/wxw/paper/researchresult/classify/modbus/netzob/out'+str(value),(7,8),int(value))
 #get_basespes(file_from,file_to,(int(start),int(end)),int(value),int(lo))
-getourspe(file_from,file_to,(int(start),int(end)),int(value))
+#getourspe(file_from,file_to,(int(start),int(end)),int(value))
 #get_results('/home/wxw/data/cip_datanew','/home/wxw/paper/researchresult/classify/cip/netzob_new/out'+str(value),(0,2),int(value))
-#get_results('/home/wxw/data/iec104','/home/wxw/paper/researchresult/classify/iec104/netzob_new/'+str(value),(6,7),int(value))
+#get_results('/home/wxw/data/iec104','/home/wxw/paper/researchresult/classify/iec104/netzob_two/'+str(value),(6,7),int(value))
 #get_funcr('/home/wxw/data/modbustest','/home/wxw/paper/researchresult/classify/modbus/ours/out'+str(value),(7,8),int(value))
 #get_funcr('/home/wxw/data/iec104','/home/wxw/paper/researchresult/classify/iec104/ours/'+str(value),(6,7),50)
+
+get_iec104('/home/wxw/data/iec104','/home/wxw/paper/researchresult/classify/iec104/combine/'+str(50),(6,7),50)
 #get_funcr('/home/wxw/data/cip_datanew','/home/wxw/paper/researchresult/classify/cip/ours/out'+str(value),(0,2),int(value))
 
 endtime = time.time()
